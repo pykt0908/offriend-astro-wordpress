@@ -1,0 +1,276 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { getSiteSettings } from '../lib/wordpress';
+import {
+  ShieldCheck,
+  SlidersHorizontal,
+  Cookie,
+  ExternalLink,
+  Layers,
+  BarChart3,
+  Megaphone,
+  Mail,
+  Phone,
+} from 'lucide-react';
+
+export const prerender = false;
+
+const siteSettings = await getSiteSettings();
+
+---
+
+<BaseLayout
+  title="นโยบายการใช้คุกกี้ (Cookie Policy) — Offriend"
+  description="นโยบายการใช้คุกกี้ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA) บริษัท ออฟเฟรนด์ จำกัด"
+>
+  <PageHeader
+    breadcrumbs={[
+      { label: 'หน้าแรก', href: '/' },
+      { label: 'นโยบายการใช้คุกกี้' },
+    ]}
+    kicker="PRIVACY & COMPLIANCE"
+    title="นโยบายการใช้คุกกี้"
+    titleGradient="(Cookie Policy)"
+    description="บริษัท ออฟเฟรนด์ จำกัด ให้ความสำคัญกับสิทธิความเป็นส่วนตัวของท่าน นโยบายนี้อธิบายถึงประเภทและวัตถุประสงค์ของการใช้งานคุกกี้บนเว็บไซต์ของเรา"
+  />
+
+  <div class="py-12 sm:py-16 bg-white dark:bg-[#070b14] transition-colors">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      
+      <!-- Interactive Cookie Settings Banner Card -->
+      <div class="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-[#162d59]/10 to-blue-500/10 dark:from-[#0c1222] dark:to-[#0a192f] border border-[#162d59]/20 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-xs">
+        <div class="space-y-1.5">
+          <div class="flex items-center gap-2 text-[#162d59] dark:text-[#38bdf8]">
+            <Cookie className="w-5 h-5" />
+            <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+              การตั้งค่าความยินยอมคุกกี้ของคุณ
+            </h2>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-normal leading-relaxed">
+            ท่านสามารถตรวจสอบและเปลี่ยนแปลงความยินยอมการใช้งานคุกกี้ได้ตลอดเวลา
+          </p>
+        </div>
+
+        <button
+          type="button"
+          id="btn-open-cookie-settings-page"
+          class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-[#162d59] hover:bg-[#0a192f] text-white shadow-xs transition-colors cursor-pointer shrink-0"
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+          <span>เปิดการตั้งค่าคุกกี้</span>
+        </button>
+      </div>
+
+      <!-- Main Policy Content -->
+      <div class="space-y-10 text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed font-normal">
+        
+        <!-- Section 1 -->
+        <section class="space-y-3">
+          <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-[#162d59]/10 text-[#162d59] dark:text-[#38bdf8] text-xs font-bold flex items-center justify-center shrink-0">1</span>
+            <span>บทนำและวัตถุประสงค์</span>
+          </h3>
+          <p>
+            นโยบายการใช้คุกกี้นี้ (<strong>"นโยบาย"</strong>) จัดทำขึ้นโดย <strong>บริษัท ออฟเฟรนด์ จำกัด</strong> (<strong>"บริษัท"</strong> หรือ <strong>"เรา"</strong>) เพื่ออธิบายให้ท่านในฐานะผู้ใช้บริการเว็บไซต์ ได้ทราบถึงลักษณะ วัตถุประสงค์ และวิธีที่เราใช้คุกกี้หรือเทคโนโลยีอื่นที่คล้ายคลึงกันบนเว็บไซต์นี้ รวมถึงทางเลือกในการจัดการและควบคุมคุกกี้ของท่าน ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA)
+          </p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            ปรับปรุงล่าสุด: 1 ตุลาคม 2569
+          </p>
+        </section>
+
+        <!-- Section 2 -->
+        <section class="space-y-3">
+          <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-[#162d59]/10 text-[#162d59] dark:text-[#38bdf8] text-xs font-bold flex items-center justify-center shrink-0">2</span>
+            <span>คุกกี้ (Cookies) คืออะไร?</span>
+          </h3>
+          <p>
+            คุกกี้ คือ ไฟล์ข้อความขนาดเล็ก (Text File) ที่ถูกดาวน์โหลดและจัดเก็บบนอุปกรณ์ของท่าน (เช่น คอมพิวเตอร์ สมาร์ตโฟน หรือแท็บเล็ต) เมื่อท่านเข้าชมเว็บไซต์ คุกกี้จะช่วยให้เว็บไซต์จดจำอุปกรณ์และการตั้งค่าของท่าน เพื่อให้ท่านสามารถใช้งานเว็บไซต์ได้อย่างต่อเนื่อง มีประสิทธิภาพ และได้รับประสบการณ์ที่เหมาะสมกับการใช้งานของท่าน
+          </p>
+        </section>
+
+        <!-- Section 3 -->
+        <section class="space-y-6">
+          <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-[#162d59]/10 text-[#162d59] dark:text-[#38bdf8] text-xs font-bold flex items-center justify-center shrink-0">3</span>
+            <span>ประเภทของคุกกี้ที่เราใช้</span>
+          </h3>
+          <p>
+            เว็บไซต์ของเรามีการใช้งานคุกกี้ 4 ประเภทหลัก โดยจำแนกตามลักษณะและวัตถุประสงค์การใช้งาน ดังต่อไปนี้:
+          </p>
+
+          <!-- 4 Cookie Types Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Type 1 -->
+            <div class="p-5 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-[#0c1222] space-y-2.5">
+              <div class="flex items-center gap-2 text-[#162d59] dark:text-[#38bdf8]">
+                <ShieldCheck className="w-5 h-5 shrink-0" />
+                <h4 class="font-bold text-base text-slate-900 dark:text-white">
+                  1. คุกกี้ที่จำเป็น (Strictly Necessary Cookies)
+                </h4>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                คุกกี้ประเภทนี้มีความจำเป็นต่อการทำงานพื้นฐานของเว็บไซต์ เพื่อให้ท่านสามารถเปิดดูหน้าเว็บ ทำงานกับฟอร์ม เข้าสู่ระบบ และเข้าถึงฟังก์ชันที่มีความปลอดภัยได้ <strong>คุกกี้นี้ไม่สามารถปิดได้ในระบบของเรา</strong>
+              </p>
+            </div>
+
+            <!-- Type 2 -->
+            <div class="p-5 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-[#0c1222] space-y-2.5">
+              <div class="flex items-center gap-2 text-[#162d59] dark:text-[#38bdf8]">
+                <Layers className="w-5 h-5 shrink-0" />
+                <h4 class="font-bold text-base text-slate-900 dark:text-white">
+                  2. เนื้อหาจากภายนอก (External Embed Cookies)
+                </h4>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                คุกกี้ที่กำหนดโดยผู้ให้บริการภายนอก เช่น แผนที่ Google Maps หรือวิดีโอ YouTube ที่ฝังอยู่บนหน้าเว็บไซต์ เพื่ออำนวยความสะดวกในการแสดงที่ตั้งสำนักงานหรือสื่อมัลติมีเดีย
+              </p>
+            </div>
+
+            <!-- Type 3 -->
+            <div class="p-5 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-[#0c1222] space-y-2.5">
+              <div class="flex items-center gap-2 text-[#162d59] dark:text-[#38bdf8]">
+                <BarChart3 className="w-5 h-5 shrink-0" />
+                <h4 class="font-bold text-base text-slate-900 dark:text-white">
+                  3. คุกกี้เพื่อการวิเคราะห์ (Analytics Cookies)
+                </h4>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                ช่วยให้เราสามารถจดจำและนับจำนวนผู้เข้าชม ตลอดจนวิเคราะห์พฤติกรรมการใช้งานหน้าเว็บ เช่น Google Analytics ข้อมูลที่บันทึกจะไม่สามารถระบุตัวตนของท่านได้โดยตรง และนำมาใช้เพื่อปรับปรุงคุณภาพเว็บเท่านั้น
+              </p>
+            </div>
+
+            <!-- Type 4 -->
+            <div class="p-5 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-[#0c1222] space-y-2.5">
+              <div class="flex items-center gap-2 text-[#162d59] dark:text-[#38bdf8]">
+                <Megaphone className="w-5 h-5 shrink-0" />
+                <h4 class="font-bold text-base text-slate-900 dark:text-white">
+                  4. คุกกี้เพื่อการตลาด (Marketing Cookies)
+                </h4>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                ใช้ในการติดตามกิจกรรมบนเว็บไซต์เพื่อวัดผลแคมเปญโฆษณา และนำเสนอข่าวสาร บริการ หรือโฆษณาที่ตรงกับความสนใจของท่านผ่านแพลตฟอร์มอย่าง Google Ads หรือ Meta (Facebook) Pixel
+              </p>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Section 4: Table -->
+        <section class="space-y-4">
+          <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-[#162d59]/10 text-[#162d59] dark:text-[#38bdf8] text-xs font-bold flex items-center justify-center shrink-0">4</span>
+            <span>ตารางรายละเอียดคุกกี้ที่อาจจัดเก็บบนอุปกรณ์</span>
+          </h3>
+
+          <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-white/10">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="bg-slate-100 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200 font-bold">
+                  <th class="p-3.5 sm:p-4">ชื่อคุกกี้</th>
+                  <th class="p-3.5 sm:p-4">ผู้ให้บริการ</th>
+                  <th class="p-3.5 sm:p-4">วัตถุประสงค์</th>
+                  <th class="p-3.5 sm:p-4">อายุการจัดเก็บ</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 dark:divide-white/10 text-slate-600 dark:text-slate-300">
+                <tr>
+                  <td class="p-3.5 sm:p-4 font-mono font-medium text-slate-900 dark:text-white">offriend_cookie_consent_v1</td>
+                  <td class="p-3.5 sm:p-4">Offriend</td>
+                  <td class="p-3.5 sm:p-4">บันทึกสถานะความยินยอมการใช้คุกกี้ของผู้ใช้งาน</td>
+                  <td class="p-3.5 sm:p-4">1 ปี</td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 sm:p-4 font-mono font-medium text-slate-900 dark:text-white">theme</td>
+                  <td class="p-3.5 sm:p-4">Offriend</td>
+                  <td class="p-3.5 sm:p-4">จดจำการเลือกธีมสว่างหรือมืด (Dark / Light Mode)</td>
+                  <td class="p-3.5 sm:p-4">ถาวร (Local Storage)</td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 sm:p-4 font-mono font-medium text-slate-900 dark:text-white">_ga, _ga_*</td>
+                  <td class="p-3.5 sm:p-4">Google Analytics</td>
+                  <td class="p-3.5 sm:p-4">วิเคราะห์สถิติจำนวนผู้เข้าชมและพฤติกรรมบนเว็บ</td>
+                  <td class="p-3.5 sm:p-4">2 ปี</td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 sm:p-4 font-mono font-medium text-slate-900 dark:text-white">_fbp</td>
+                  <td class="p-3.5 sm:p-4">Meta (Facebook)</td>
+                  <td class="p-3.5 sm:p-4">วัดผลลัพธ์ประสิทธิภาพและนำเสนอเนื้อหาโฆษณา</td>
+                  <td class="p-3.5 sm:p-4">3 เดือน</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Section 5 -->
+        <section class="space-y-3">
+          <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-[#162d59]/10 text-[#162d59] dark:text-[#38bdf8] text-xs font-bold flex items-center justify-center shrink-0">5</span>
+            <span>การควบคุมและตั้งค่าคุกกี้บนเว็บเบราว์เซอร์</span>
+          </h3>
+          <p>
+            นอกจากระบบจัดการคุกกี้บนเว็บไซต์ของเราแล้ว ท่านยังสามารถตั้งค่าหรือลบคุกกี้ผ่านการตั้งค่าของโปรแกรมเว็บบราวเซอร์ที่ท่านใช้งานได้ ดังลิงก์แนะนำต่อไปนี้:
+          </p>
+          <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm pt-1">
+            <li class="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-between">
+              <span class="font-medium text-slate-800 dark:text-slate-200">Google Chrome</span>
+              <a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener noreferrer" class="text-[#162d59] dark:text-[#38bdf8] hover:underline inline-flex items-center gap-1">วิธีตั้งค่า <ExternalLink className="w-3 h-3" /></a>
+            </li>
+            <li class="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-between">
+              <span class="font-medium text-slate-800 dark:text-slate-200">Apple Safari</span>
+              <a href="https://support.apple.com/th-th/guide/safari/sfri11471/mac" target="_blank" rel="noopener noreferrer" class="text-[#162d59] dark:text-[#38bdf8] hover:underline inline-flex items-center gap-1">วิธีตั้งค่า <ExternalLink className="w-3 h-3" /></a>
+            </li>
+            <li class="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-between">
+              <span class="font-medium text-slate-800 dark:text-slate-200">Microsoft Edge</span>
+              <a href="https://support.microsoft.com/th-th/microsoft-edge/delete-cookies-in-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09" target="_blank" rel="noopener noreferrer" class="text-[#162d59] dark:text-[#38bdf8] hover:underline inline-flex items-center gap-1">วิธีตั้งค่า <ExternalLink className="w-3 h-3" /></a>
+            </li>
+            <li class="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-between">
+              <span class="font-medium text-slate-800 dark:text-slate-200">Mozilla Firefox</span>
+              <a href="https://support.mozilla.org/th/kb/enhanced-tracking-protection-firefox-desktop" target="_blank" rel="noopener noreferrer" class="text-[#162d59] dark:text-[#38bdf8] hover:underline inline-flex items-center gap-1">วิธีตั้งค่า <ExternalLink className="w-3 h-3" /></a>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Section 6: Contact -->
+        <section class="space-y-4 pt-4 border-t border-slate-200 dark:border-white/10">
+          <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-[#162d59]/10 text-[#162d59] dark:text-[#38bdf8] text-xs font-bold flex items-center justify-center shrink-0">6</span>
+            <span>ติดต่อผู้ควบคุมข้อมูลส่วนบุคคล</span>
+          </h3>
+          <p>
+            หากท่านมีข้อสงสัยหรือคำถามเกี่ยวกับนโยบายการใช้คุกกี้ หรือการคุ้มครองข้อมูลส่วนบุคคล สามารถติดต่อเราได้ที่:
+          </p>
+
+          <div class="p-5 rounded-2xl bg-slate-50 dark:bg-[#0c1222] border border-slate-200 dark:border-white/10 space-y-2 text-xs sm:text-sm">
+            <div class="font-bold text-slate-900 dark:text-white text-base">{siteSettings.company_name_th} ({siteSettings.company_name_en})</div>
+            <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+              <Mail className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8]" />
+              <span>อีเมล: {siteSettings.contact_email}</span>
+            </div>
+            <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+              <Phone className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8]" />
+              <span>โทรศัพท์: {siteSettings.phone} ({siteSettings.working_hours})</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  function setupPolicyPage() {
+    const btnOpen = document.getElementById('btn-open-cookie-settings-page');
+    if (btnOpen) {
+      btnOpen.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('open-cookie-consent'));
+      });
+    }
+  }
+
+  document.addEventListener('astro:page-load', setupPolicyPage);
+</script>

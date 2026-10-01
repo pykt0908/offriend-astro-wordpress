@@ -1,0 +1,299 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { getProjectsFromWP } from '../lib/wordpress';
+import {
+  Building2,
+  Calendar,
+  MapPin,
+  ArrowRight,
+  Layers,
+  Sparkles,
+} from 'lucide-react';
+
+export const prerender = false;
+
+const wpProjects = await getProjectsFromWP();
+
+const defaultProjectImages: Record<string, string> = {
+  'nextjs-advanced-egat': '/images/contact-seminar.jpg',
+  'workshop-fullstack-nextjs-bts': '/images/solutions/web-development.jpg',
+  'corporate-cloud-devops-mea': '/images/solutions/enterprise-consult.jpg',
+  'headless-wp-astro-enterprise-nstda': '/images/solutions/office-tools.jpg',
+};
+
+const projectsData = wpProjects.map((p) => {
+  const meta = p.project_meta || {};
+  return {
+    slug: p.slug,
+    title: p.title?.rendered || '',
+    category: meta.category_tag || 'พัฒนาซอฟต์แวร์',
+    client: meta.client || 'องค์กรพันธมิตร',
+    location: 'กรุงเทพมหานคร',
+    date: meta.year || '2569',
+    subtitle: p.title?.rendered || '',
+    image: p.featured_image_url || defaultProjectImages[p.slug] || '/images/contact-seminar.jpg',
+    imageAlt: p.title?.rendered || '',
+    excerpt: p.excerpt?.rendered?.replace(/<[^>]*>?/gm, '').trim() || p.content?.rendered?.replace(/<[^>]*>?/gm, '').trim() || '',
+    techStack: meta.tech_stack && meta.tech_stack.length > 0 ? meta.tech_stack : ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'],
+  };
+});
+
+const dynamicCategories = Array.from(new Set(projectsData.map((p) => p.category))).filter(Boolean);
+const projectCategories = ['ทั้งหมด', ...dynamicCategories];
+
+---
+
+<BaseLayout
+  title="ผลงานและโครงการจริง — Offriend Project Case Studies"
+  description="กรณีศึกษาและผลงานจริงด้านการพัฒนาซอฟต์แวร์ เว็บแอปพลิเคชัน สถาปัตยกรรม Headless CMS และหลักสูตรจัดอบรมไอทีระดับองค์กร"
+>
+  <PageHeader
+    breadcrumbs={[
+      { label: 'หน้าแรก', href: '/' },
+      { label: 'ผลงานของเรา' },
+    ]}
+    kicker="PROVEN TRACK RECORD & CASE STUDIES"
+    title="ผลงานและโครงการจริง"
+    titleGradient="ส่งมอบความสำเร็จให้องค์กรชั้นนำ"
+    description="ความภาคภูมิใจของเราคือการสร้างระบบเทคโนโลยีที่ใช้งานได้จริง เสถียร เพื่อขับเคลื่อนความสำเร็จขององค์กร"
+  />
+
+  <section class="py-12 sm:py-16 bg-slate-50/60 dark:bg-[#070b14] transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      
+      <!-- Category Filter Chips -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 dark:border-white/10 pb-6">
+        <div class="flex items-center gap-2">
+          <Layers className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8]" />
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            เลือกดูตามหมวดหมู่:
+          </span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2" id="project-filter-chips">
+          {
+            projectCategories.map((cat, idx) => (
+              <button
+                type="button"
+                data-category={cat}
+                class:list={[
+                  'project-filter-btn px-4 py-2 rounded-full text-xs sm:text-sm font-bold border transition-all duration-200 cursor-pointer select-none',
+                  idx === 0
+                    ? 'active bg-[#162d59] text-white border-[#162d59] dark:bg-[#38bdf8] dark:text-[#0a192f] dark:border-[#38bdf8] shadow-sm'
+                    : 'bg-white dark:bg-[#0c1222] text-slate-700 dark:text-slate-300 border-slate-200/90 dark:border-white/10 hover:border-[#162d59]/40 dark:hover:border-[#38bdf8]/40 hover:bg-slate-50 dark:hover:bg-white/5',
+                ]}
+              >
+                {cat}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- Projects 3-Column Grid -->
+      <div
+        id="projects-grid"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
+      >
+        {
+          projectsData.map((project) => (
+            <article
+              data-project-category={project.category}
+              class="project-card group flex flex-col h-full rounded-2xl overflow-hidden border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#0c1222] shadow-xs hover:shadow-xl hover:border-[#162d59]/40 dark:hover:border-[#38bdf8]/40 transition-all duration-300 hover:-translate-y-1"
+            >
+              <!-- Thumbnail -->
+              <a
+                href={`/projects/${project.slug}`}
+                class="block relative aspect-[16/10] w-full overflow-hidden bg-slate-100 dark:bg-slate-800"
+              >
+                <img
+                  src={project.image}
+                  alt={project.imageAlt}
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+
+                <!-- Category Badge floating on image -->
+                <div class="absolute top-3.5 left-3.5">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-white/95 dark:bg-[#070b14]/90 text-[#162d59] dark:text-[#38bdf8] border border-white/20 backdrop-blur-md shadow-xs">
+                    {project.category}
+                  </span>
+                </div>
+              </a>
+
+              <!-- Card Body -->
+              <div class="p-5 sm:p-6 flex flex-col flex-grow justify-between space-y-4">
+                <div class="space-y-3">
+                  <!-- Meta row: Date & Location -->
+                  <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                    <span class="inline-flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{project.date}</span>
+                    </span>
+                    <span>•</span>
+                    <span class="inline-flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{project.location}</span>
+                    </span>
+                  </div>
+
+                  <!-- Title -->
+                  <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white group-hover:text-[#162d59] dark:group-hover:text-[#38bdf8] transition-colors line-clamp-2 leading-snug">
+                    <a href={`/projects/${project.slug}`}>
+                      {project.title}
+                    </a>
+                  </h3>
+
+                  <!-- Client Name -->
+                  <div class="flex items-start gap-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+                    <Building2 className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8] shrink-0 mt-0.5" />
+                    <span class="line-clamp-1">{project.client}</span>
+                  </div>
+
+                  <!-- Short Excerpt -->
+                  <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed font-normal">
+                    {project.excerpt}
+                  </p>
+                </div>
+
+                <!-- Footer Action & Tech stack -->
+                <div class="pt-4 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
+                  <div class="flex items-center gap-1.5 overflow-hidden">
+                    {project.techStack.slice(0, 3).map((tech) => (
+                      <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400">
+                        {tech}
+                      </span>
+                    ))}
+                    {project.techStack.length > 3 && (
+                      <span class="text-[11px] font-mono text-slate-400">
+                        +{project.techStack.length - 3}
+                      </span>
+                    )}
+                  </div>
+
+                  <a
+                    href={`/projects/${project.slug}`}
+                    class="inline-flex items-center gap-1 text-xs font-bold text-[#162d59] dark:text-[#38bdf8] group-hover:translate-x-0.5 transition-transform shrink-0 ml-2"
+                  >
+                    <span>ดูรายละเอียด</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+
+      <!-- No items found state -->
+      <div
+        id="no-projects-found"
+        class="hidden py-16 text-center rounded-2xl bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-white/10"
+      >
+        <Sparkles className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">
+          ไม่พบผลงานในหมวดหมู่นี้
+        </h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          กรุณาเลือกดูหมวดหมู่อื่น หรือดูผลงานทั้งหมด
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="py-16 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-[#060a12] transition-colors">
+    <div class="max-w-4xl mx-auto px-4 text-center space-y-4">
+      <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white">
+        ต้องการจัดอบรมหรือพัฒนาระบบเทคโนโลยีสำหรับองค์กรของคุณ?
+      </h2>
+      <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed font-normal">
+        ทีมงาน Offriend พร้อมร่วมวางแผน ออกแบบหลักสูตร และพัฒนาซอฟต์แวร์ที่ตอบโจทย์เฉพาะทางขององค์กรคุณอย่างมืออาชีพ
+      </p>
+      <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="/contact" class="btn-brand-primary text-sm py-3 px-8 inline-flex items-center gap-2">
+          <span>ติดต่อเพื่อขอคำปรึกษาและใบเสนอราคา</span>
+          <ArrowRight className="w-4 h-4" />
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  function setupProjectFilters() {
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.project-filter-btn');
+    const cards = document.querySelectorAll<HTMLElement>('.project-card');
+    const noProjects = document.getElementById('no-projects-found');
+
+    if (!buttons.length || !cards.length) return;
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const selectedCat = btn.getAttribute('data-category') || 'ทั้งหมด';
+
+        // Update active class
+        buttons.forEach((b) => {
+          b.classList.remove(
+            'active',
+            'bg-[#162d59]',
+            'text-white',
+            'border-[#162d59]',
+            'dark:bg-[#38bdf8]',
+            'dark:text-[#0a192f]',
+            'dark:border-[#38bdf8]',
+            'shadow-sm'
+          );
+          b.classList.add(
+            'bg-white',
+            'dark:bg-[#0c1222]',
+            'text-slate-700',
+            'dark:text-slate-300',
+            'border-slate-200/90',
+            'dark:border-white/10'
+          );
+        });
+
+        btn.classList.add(
+          'active',
+          'bg-[#162d59]',
+          'text-white',
+          'border-[#162d59]',
+          'dark:bg-[#38bdf8]',
+          'dark:text-[#0a192f]',
+          'dark:border-[#38bdf8]',
+          'shadow-sm'
+        );
+        btn.classList.remove(
+          'bg-white',
+          'dark:bg-[#0c1222]',
+          'text-slate-700',
+          'dark:text-slate-300',
+          'border-slate-200/90',
+          'dark:border-white/10'
+        );
+
+        // Filter cards
+        let visibleCount = 0;
+        cards.forEach((card) => {
+          const cardCat = card.getAttribute('data-project-category');
+          if (selectedCat === 'ทั้งหมด' || cardCat === selectedCat) {
+            card.style.display = '';
+            visibleCount++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        if (noProjects) {
+          noProjects.classList.toggle('hidden', visibleCount > 0);
+        }
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', setupProjectFilters);
+</script>

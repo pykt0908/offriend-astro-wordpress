@@ -1,0 +1,105 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import BackToTop from '../components/BackToTop.astro';
+import CookieConsent from '../components/CookieConsent.astro';
+import SearchModal from '../components/SearchModal.astro';
+import { ClientRouter } from 'astro:transitions';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title = 'Offriend — Software & Digital Engineering Company',
+  description = 'Offriend ผู้นำด้านการพัฒนาซอฟต์แวร์ คลาวด์ และดิจิทัลทรานส์ฟอร์เมชัน ขับเคลื่อนธุรกิจสู่ความสำเร็จด้วยเทคโนโลยีสมัยใหม่',
+  image = '/images/logos/no-bg/1.7TP.png',
+} = Astro.props;
+
+const currentPath = Astro.url.pathname;
+const siteUrl = Astro.site ? Astro.site.toString() : 'http://localhost:4321';
+---
+
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <ClientRouter />
+    
+    <!-- Theme Initializer (Zero-Flicker: Sets theme before DOM swap) -->
+    <script is:inline>
+      const applyTheme = (doc = document) => {
+        const saved = typeof localStorage !== 'undefined' ? localStorage.getItem('theme') : null;
+        if (saved === 'dark') {
+          doc.documentElement.classList.add('dark');
+        } else {
+          doc.documentElement.classList.remove('dark');
+        }
+      };
+      applyTheme();
+      document.addEventListener('astro:before-swap', (e) => applyTheme(e.newDocument));
+      document.addEventListener('astro:after-swap', () => applyTheme(document));
+    </script>
+    
+    <!-- Favicon: Perfectly proportioned 1:1 square canvas (SVG adapts to Light/Dark tab themes) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    
+    <!-- Google Fonts: Google Sans, Google Sans Flex & Noto Sans Thai -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,700&family=Google+Sans+Flex:wght@400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Preload LINE Seed Sans TH Fonts -->
+    <link
+      rel="preload"
+      href="/fonts/lineseed/LINESeedSansTH_W_Rg.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/lineseed/LINESeedSansTH_W_Bd.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+  </head>
+  <body class="flex flex-col min-h-screen bg-white dark:bg-[#070b14] text-slate-900 dark:text-slate-100 selection:bg-[#060c2e] selection:text-white dark:selection:bg-indigo-300 dark:selection:text-slate-950">
+    <Header currentPath={currentPath} />
+    
+    <main class="flex-grow">
+      <slot />
+    </main>
+
+    <Footer />
+    <BackToTop />
+    <CookieConsent />
+    <SearchModal />
+  </body>
+</html>

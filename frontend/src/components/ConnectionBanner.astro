@@ -1,0 +1,74 @@
+﻿---
+import { checkWordPressStatus } from '../lib/wordpress';
+import { CheckCircle2, Zap, ArrowUpRight } from 'lucide-react';
+
+const status = await checkWordPressStatus();
+---
+
+<div
+  class:list={[
+    'w-full p-4 sm:p-5 rounded-xl border transition-all duration-300 backdrop-blur-xl',
+    status.isConnected
+      ? 'bg-emerald-50/80 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-500/30 shadow-[0_0_25px_rgba(16,185,129,0.08)]'
+      : 'bg-sky-50/80 dark:bg-sky-950/20 border-blue-300 dark:border-[#162d59]/30 shadow-[0_0_25px_rgba(56,189,248,0.08)]',
+  ]}
+>
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex items-start sm:items-center gap-3.5">
+      <div
+        class:list={[
+          'w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0',
+          status.isConnected ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-[#162d59]/20 text-[#060c2e] dark:text-[#38bdf8]',
+        ]}
+      >
+        {status.isConnected ? <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /> : <Zap className="w-5 h-5 text-[#060c2e] dark:text-[#38bdf8]" />}
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            {status.isConnected ? 'WordPress Headless CMS เชื่อมต่อสำเร็จ' : 'ระบบ XAMPP MySQL พร้อมใช้งาน'}
+          </span>
+          <span
+            class:list={[
+              'text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full',
+              status.isConnected
+                ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                : 'bg-[#162d59]/20 text-[#0a192f] dark:text-[#93c5fd] border border-[#162d59]/30',
+            ]}
+          >
+            {status.isConnected ? 'LIVE SYNC' : 'OFFRIEND CMS'}
+          </span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-0.5 font-normal">
+          {
+            status.isConnected ? (
+              <>
+                ดึงข้อมูลบทความและเนื้อหาจากฐานข้อมูล <code class="px-1.5 py-0.5 rounded bg-slate-200/90 dark:bg-white/10 text-sky-900 dark:text-[#93c5fd] font-mono text-xs font-semibold">offriend_db</code> แบบ Dynamic ผ่าน REST API
+              </>
+            ) : (
+              <>
+                โฟลเดอร์ <code class="px-1.5 py-0.5 rounded bg-slate-200/90 dark:bg-white/10 text-sky-900 dark:text-[#93c5fd] font-mono text-xs font-semibold">backend/</code> และฐานข้อมูล <code class="px-1.5 py-0.5 rounded bg-slate-200/90 dark:bg-white/10 text-sky-900 dark:text-[#93c5fd] font-mono text-xs font-semibold">offriend_db</code> พร้อมแล้ว คลิกเพื่อเปิดหน้าจัดการ WordPress
+              </>
+            )
+          }
+        </p>
+      </div>
+    </div>
+
+    <div class="flex-shrink-0">
+      <a
+        href={
+          status.isConnected
+            ? 'http://localhost/offriend-backend/wp-admin/'
+            : 'http://localhost/offriend-backend/wp-admin/install.php'
+        }
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold px-4 py-2 rounded-xl bg-white dark:bg-white/10 hover:bg-slate-50 dark:hover:bg-white/15 text-slate-800 dark:text-white border border-slate-300 dark:border-white/15 hover:border-indigo-300/50 shadow-xs transition-all"
+      >
+        <span>{status.isConnected ? 'เปิด WP Dashboard' : 'ตั้งค่า WordPress (5 นาที)'}</span>
+        <ArrowUpRight className="w-3.5 h-3.5 opacity-70" />
+      </a>
+    </div>
+  </div>
+</div>

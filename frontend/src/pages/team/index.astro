@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { getTeamMembers } from '../../lib/wordpress';
+
+export const prerender = false;
+
+const teamMembers = await getTeamMembers();
+
+---
+
+<BaseLayout
+  title="บุคลากร — Offriend"
+  description="ทำความรู้จักกับทีมวิทยากรและผู้เชี่ยวชาญด้านเทคโนโลยีและการพัฒนาซอฟต์แวร์ของ Offriend"
+>
+  <!-- Page Header -->
+  <PageHeader
+    breadcrumbs={[
+      { label: 'หน้าแรก', href: '/' },
+      { label: 'เกี่ยวกับเรา', href: '/team' },
+      { label: 'บุคลากร' },
+    ]}
+    kicker="OUR TEAM"
+    title="บุคลากรและ"
+    titleGradient="ผู้บริหาร"
+    description="ทีมผู้บริหาร และผู้เชี่ยวชาญด้านไอที"
+  />
+
+  <div class="py-12 sm:py-16 bg-white dark:bg-[#070b14] transition-colors">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Team Members 3-Column Grid matching reference -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        {
+          teamMembers.map((member) => (
+            <a
+              href={`/team/${member.slug}`}
+              class="group block p-8 rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#0c1222] shadow-xs hover:shadow-lg hover:border-[#38bdf8]/50 dark:hover:border-[#38bdf8]/50 transition-all duration-300 text-center"
+            >
+              <!-- Avatar -->
+              <div class="flex justify-center mb-5">
+                <img
+                  src={member.avatar}
+                  alt={member.name}
+                  class="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover shadow-xs ring-4 ring-slate-100 dark:ring-white/5 group-hover:ring-[#38bdf8]/40 dark:group-hover:ring-[#38bdf8]/40 group-hover:scale-105 transition-all duration-300"
+                  loading="lazy"
+                />
+              </div>
+
+              <!-- Name -->
+              <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#162d59] dark:group-hover:text-[#38bdf8] transition-colors mb-1.5">
+                {member.name}
+              </h3>
+
+              <!-- Role -->
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
+                {member.role}
+              </p>
+            </a>
+          ))
+        }
+      </div>
+
+    </div>
+  </div>
+</BaseLayout>

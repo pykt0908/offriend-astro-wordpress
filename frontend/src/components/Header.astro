@@ -1,0 +1,585 @@
+---
+import ThemeToggle from "./ThemeToggle.astro";
+import { getSiteSettings } from "../lib/wordpress";
+import {
+  Phone,
+  Smartphone,
+  CreditCard,
+  Clock,
+  Search,
+  Globe,
+  ChevronDown,
+  Menu,
+  X,
+} from "lucide-react";
+
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = "/" } = Astro.props;
+const siteSettings = await getSiteSettings();
+---
+
+<!-- 1. TOP ANNOUNCEMENT BAR (Normal flow: naturally scrolls away when user scrolls down) -->
+<div
+  class="relative w-full bg-[#0a192f] text-white text-xs py-2 border-b border-[#162a4a]"
+>
+  <div
+    class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-2.5"
+  >
+    <!-- Left Contact Info -->
+    <div class="flex flex-wrap items-center gap-3 sm:gap-4 font-normal">
+      <a
+        href={`tel:${siteSettings.phone.replace(/[^0-9]/g, '')}`}
+        class="flex items-center gap-1.5 hover:text-[#93c5fd] transition-colors"
+      >
+        <Smartphone className="w-3.5 h-3.5 text-[#38bdf8]" />
+        <span>โทร/มือถือ <strong class="font-bold">{siteSettings.phone}</strong></span>
+      </a>
+      <span class="opacity-30 hidden sm:inline">|</span>
+      <a
+        href="/contact"
+        class="flex items-center gap-1.5 hover:text-[#93c5fd] transition-colors"
+      >
+        <CreditCard className="w-3.5 h-3.5 text-[#38bdf8]" />
+        <span>ชำระเงิน</span>
+      </a>
+    </div>
+
+    <!-- Right Search Box & LINE Button -->
+    <div
+      class="flex items-center gap-3 sm:gap-4 w-full md:w-auto justify-between md:justify-end"
+    >
+      <!-- Search Trigger Button (Opens Full-screen Overlay Modal) -->
+      <button
+        type="button"
+        data-open-search-modal
+        aria-label="ค้นหาข้อมูล"
+        class="flex items-center justify-between bg-white dark:bg-white/10 rounded-md overflow-hidden max-w-[240px] sm:max-w-[280px] w-full shadow-inner border border-slate-200/60 dark:border-white/10 px-3 py-1.5 cursor-pointer text-left group hover:border-[#38bdf8] transition-colors"
+      >
+        <span class="text-slate-400 dark:text-slate-300 text-xs truncate">
+          ค้นหาผลงาน, บริการ, บทความ...
+        </span>
+        <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#38bdf8] shrink-0 ml-1.5 transition-colors" />
+      </button>
+
+      <!-- Working Hours -->
+      <div
+        class="hidden lg:flex items-center gap-1.5 text-[11px] text-slate-300 whitespace-nowrap"
+      >
+        <Clock className="w-3.5 h-3.5 text-[#38bdf8]" />
+        <span>จ-ศ 9:00-17:00 น.</span>
+      </div>
+
+      <!-- LINE Official Button -->
+      <a
+        href="https://line.me"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-1.5 bg-[#06c755] hover:bg-[#05b34c] text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-sm transition-transform hover:scale-105 whitespace-nowrap"
+      >
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+          <path
+            d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"
+          ></path>
+        </svg>
+        <span>@offriend</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- 2. MAIN NAVBAR (STICKY AT TOP OF PAGE: pure white in light mode, dark obsidian in dark mode) -->
+<header
+  class="sticky top-0 z-50 w-full bg-white dark:bg-[#070b14] border-b border-slate-200/90 dark:border-white/10 shadow-sm transition-all duration-300"
+>
+  <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-20">
+      <!-- Brand Logo (Emblem + Name + Tagline) -->
+      <a
+        href="/"
+        class="flex items-center gap-2.5 sm:gap-3 focus:outline-none select-none"
+      >
+        <!-- Light Mode Emblem (1.6TP.png) -->
+        <img
+          src="/images/logos/no-bg/1.6TP.png"
+          alt="ออฟเฟรนด์"
+          class="logo-light h-9 sm:h-10 lg:h-[42px] w-auto object-contain"
+          loading="eager"
+        />
+        <!-- Dark Mode Emblem (1.5TP.png) -->
+        <img
+          src="/images/logos/no-bg/1.5TP.png"
+          alt="ออฟเฟรนด์"
+          class="logo-dark h-9 sm:h-10 lg:h-[42px] w-auto object-contain drop-shadow-[0_0_14px_rgba(56,189,248,0.4)]"
+          loading="eager"
+        />
+        <div class="flex flex-col justify-center">
+          <span
+            class="text-xl sm:text-[22px] font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight"
+          >
+            ออฟเฟรนด์
+          </span>
+          <span
+            class="text-[11px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400 tracking-wide leading-none mt-0.5"
+          >
+            เพื่อนคู่คิดคนออฟฟิศ
+          </span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Links (Styled with Offriend Palette, Bold, No Jitter, Active Parent on Submenu) -->
+      <nav
+        class="hidden xl:flex items-center gap-1 sm:gap-1.5 text-[15px] font-bold text-slate-800 dark:text-slate-100"
+      >
+        <!-- บริการ (ลิงก์ตรง ไม่มี submenu) -->
+        <a
+          href="/services"
+          class:list={[
+            "group flex items-center px-3 py-1.5 rounded-lg transition-colors duration-200",
+            "hover:bg-sky-50 dark:hover:bg-white/10 hover:text-[#162d59] dark:hover:text-[#93c5fd]",
+            currentPath.startsWith("/services")
+              ? "text-[#162d59] dark:text-[#38bdf8]"
+              : "text-slate-700 dark:text-slate-200",
+          ]}
+        >
+          <span
+            class:list={[
+              "relative pb-0.5 after:absolute after:-bottom-1 after:left-0 after:right-0 after:h-[2.5px] after:bg-[#e8624f] after:rounded-full after:transition-opacity after:duration-200",
+              currentPath.startsWith("/services")
+                ? "after:opacity-100"
+                : "after:opacity-0 group-hover:after:opacity-100",
+            ]}>บริการ</span
+          >
+        </a>
+
+        <!-- ผลงาน -->
+        <a
+          href="/projects"
+          class:list={[
+            "group flex items-center px-3 py-1.5 rounded-lg transition-colors duration-200",
+            "hover:bg-sky-50 dark:hover:bg-white/10 hover:text-[#162d59] dark:hover:text-[#93c5fd]",
+            currentPath.startsWith("/projects")
+              ? "text-[#162d59] dark:text-[#38bdf8]"
+              : "text-slate-700 dark:text-slate-200",
+          ]}
+        >
+          <span
+            class:list={[
+              "relative pb-0.5 after:absolute after:-bottom-1 after:left-0 after:right-0 after:h-[2.5px] after:bg-[#e8624f] after:rounded-full after:transition-opacity after:duration-200",
+              currentPath.startsWith("/projects")
+                ? "after:opacity-100"
+                : "after:opacity-0 group-hover:after:opacity-100",
+            ]}>ผลงาน</span
+          >
+        </a>
+
+        <!-- Dropdown: สำหรับองค์กร -->
+        <div class="relative group py-2">
+          <a
+            href="/#enterprise-solutions"
+            class:list={[
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors duration-200",
+              "group-hover:bg-sky-50 dark:group-hover:bg-white/10 group-hover:text-[#162d59] dark:group-hover:text-[#38bdf8]",
+              currentPath.startsWith("/tools") || currentPath.includes("enterprise")
+                ? "text-[#162d59] dark:text-[#38bdf8]"
+                : "text-slate-700 dark:text-slate-200",
+            ]}
+          >
+            <span
+              class:list={[
+                "relative pb-0.5 after:absolute after:-bottom-1 after:left-0 after:right-0 after:h-[2.5px] after:bg-[#e8624f] after:rounded-full after:transition-opacity after:duration-200",
+                currentPath.startsWith("/tools") || currentPath.includes("enterprise")
+                  ? "after:opacity-100"
+                  : "after:opacity-0 group-hover:after:opacity-100",
+              ]}>สำหรับองค์กร</span
+            >
+            <ChevronDown
+              className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 group-hover:text-[#162d59] dark:group-hover:text-[#38bdf8] group-hover:rotate-180 transition-all duration-200 stroke-[2.5]"
+            />
+          </a>
+          <div
+            class="absolute left-0 top-full hidden group-hover:block w-56 bg-white dark:bg-[#0e1526] border border-slate-200 dark:border-white/10 rounded-lg shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150"
+          >
+            <a
+              href="/tools"
+              class="block px-3.5 py-2.5 rounded-md text-sm text-slate-700 dark:text-slate-200 hover:bg-sky-50 dark:hover:bg-white/5 hover:text-[#162d59] dark:hover:text-[#38bdf8] transition-colors font-semibold"
+            >
+              เครื่องมือและเทมเพลตฟรี
+            </a>
+            <a
+              href="/contact"
+              class="block px-3.5 py-2.5 rounded-md text-sm text-slate-700 dark:text-slate-200 hover:bg-sky-50 dark:hover:bg-white/5 hover:text-[#162d59] dark:hover:text-[#38bdf8] transition-colors font-semibold"
+            >
+              ขอใบเสนอราคาองค์กร
+            </a>
+          </div>
+        </div>
+
+        <!-- บทความ -->
+        <a
+          href="/blog"
+          class:list={[
+            "group flex items-center px-3 py-1.5 rounded-lg transition-colors duration-200",
+            "hover:bg-sky-50 dark:hover:bg-white/10 hover:text-[#162d59] dark:hover:text-[#93c5fd]",
+            currentPath.startsWith("/blog")
+              ? "text-[#162d59] dark:text-[#38bdf8]"
+              : "text-slate-700 dark:text-slate-200",
+          ]}
+        >
+          <span
+            class:list={[
+              "relative pb-0.5 after:absolute after:-bottom-1 after:left-0 after:right-0 after:h-[2.5px] after:bg-[#e8624f] after:rounded-full after:transition-opacity after:duration-200",
+              currentPath.startsWith("/blog")
+                ? "after:opacity-100"
+                : "after:opacity-0 group-hover:after:opacity-100",
+            ]}>บทความ</span
+          >
+        </a>
+
+        <!-- บุคลากร -->
+        <a
+          href="/team"
+          class:list={[
+            "group flex items-center px-3 py-1.5 rounded-lg transition-colors duration-200",
+            "hover:bg-sky-50 dark:hover:bg-white/10 hover:text-[#162d59] dark:hover:text-[#93c5fd]",
+            currentPath.startsWith("/team") || currentPath.startsWith("/about")
+              ? "text-[#162d59] dark:text-[#38bdf8]"
+              : "text-slate-700 dark:text-slate-200",
+          ]}
+        >
+          <span
+            class:list={[
+              "relative pb-0.5 after:absolute after:-bottom-1 after:left-0 after:right-0 after:h-[2.5px] after:bg-[#e8624f] after:rounded-full after:transition-opacity after:duration-200",
+              currentPath.startsWith("/team") || currentPath.startsWith("/about")
+                ? "after:opacity-100"
+                : "after:opacity-0 group-hover:after:opacity-100",
+            ]}>บุคลากร</span
+          >
+        </a>
+
+        <!-- ติดต่อเรา -->
+        <a
+          href="/contact"
+          class:list={[
+            "group flex items-center px-3 py-1.5 rounded-lg transition-colors duration-200",
+            "hover:bg-sky-50 dark:hover:bg-white/10 hover:text-[#162d59] dark:hover:text-[#93c5fd]",
+            currentPath.startsWith("/contact")
+              ? "text-[#162d59] dark:text-[#38bdf8]"
+              : "text-slate-700 dark:text-slate-200",
+          ]}
+        >
+          <span
+            class:list={[
+              "relative pb-0.5 after:absolute after:-bottom-1 after:left-0 after:right-0 after:h-[2.5px] after:bg-[#e8624f] after:rounded-full after:transition-opacity after:duration-200",
+              currentPath.startsWith("/contact")
+                ? "after:opacity-100"
+                : "after:opacity-0 group-hover:after:opacity-100",
+            ]}>ติดต่อเรา</span
+          >
+        </a>
+      </nav>
+
+      <!-- Right Side Utility Controls & CTA -->
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        <!-- Quick Search Icon Button (Opens Search Modal) -->
+        <button
+          type="button"
+          data-open-search-modal
+          class="h-10 w-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 hover:text-[#162d59] dark:hover:text-[#38bdf8] transition-all shadow-xs cursor-pointer"
+          title="ค้นหา (Ctrl + K)"
+          aria-label="ค้นหา"
+        >
+          <Search className="w-4 h-4" />
+        </button>
+
+        <!-- Theme Toggle (Moon / Sun from Lucide) (h-10 w-10 rounded-lg) -->
+        <ThemeToggle variant="icon" />
+
+        <!-- Language Selector Pill (h-10 rounded-lg) -->
+        <div class="relative group">
+          <button
+            type="button"
+            class="h-10 px-3.5 flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#162d59] dark:hover:text-[#38bdf8] transition-all shadow-xs cursor-pointer"
+            aria-label="Select Language"
+          >
+            <Globe className="w-4 h-4 text-[#060c2e] dark:text-[#38bdf8]" />
+            <span>TH</span>
+            <ChevronDown className="w-3 h-3 opacity-60 transition-transform group-hover:rotate-180" />
+          </button>
+          <div
+            class="absolute right-0 top-full pt-1.5 hidden group-hover:block w-44 z-50"
+          >
+            <div
+              class="bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl shadow-slate-900/10 dark:shadow-black/40 p-1.5 space-y-1"
+            >
+              <button
+                type="button"
+                class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl bg-[#e8f0fe] dark:bg-[#162d59]/40 text-[#162d59] dark:text-sky-300 text-left transition-colors cursor-pointer"
+              >
+                <span class="text-xs font-bold w-6 tracking-wide">TH</span>
+                <span class="text-sm font-bold font-display">ไทย</span>
+              </button>
+              <button
+                type="button"
+                class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 text-left transition-colors cursor-pointer"
+              >
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 w-6 tracking-wide">EN</span>
+                <span class="text-sm font-medium">English</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prominent CTA Button (Solid Orange, No Gradient) (h-10 rounded-lg) -->
+        <a
+          href="/contact"
+          class="hidden sm:inline-flex h-10 items-center justify-center px-5 rounded-lg font-bold text-sm text-white bg-orange-500 hover:bg-orange-600 shadow-sm hover:shadow-md hover:shadow-orange-500/30 transition-all duration-200 transform hover:-translate-y-0.5 active:scale-[0.98] whitespace-nowrap"
+        >
+          สอบถามบริการ
+        </a>
+
+        <!-- Mobile Hamburger Button (h-10 w-10 rounded-lg) -->
+        <button
+          id="mobile-drawer-open-btn"
+          type="button"
+          class="xl:hidden h-10 w-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/10 focus:outline-none cursor-pointer"
+          aria-label="Open Mobile Menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 3. MOBILE SLIDE-OVER DRAWER -->
+<div id="mobile-drawer" class="fixed inset-0 z-[100] hidden">
+  <!-- Backdrop Blur -->
+  <div
+    id="mobile-drawer-backdrop"
+    class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+  >
+  </div>
+
+  <!-- Drawer Content Panel (Slide in from right) -->
+  <div
+    class="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white dark:bg-[#0c1222] shadow-2xl flex flex-col justify-between p-6 overflow-y-auto transition-transform duration-300 border-l border-slate-200 dark:border-white/10"
+  >
+    <div>
+      <!-- Drawer Header: Logo + Close [X] Button -->
+      <div
+        class="flex items-center justify-between pb-6 border-b border-slate-200 dark:border-white/10 mb-6"
+      >
+        <a href="/" class="flex items-center gap-2.5">
+          <img
+            src="/images/logos/no-bg/1.6TP.png"
+            alt="ออฟเฟรนด์"
+            class="logo-light h-9 sm:h-10 w-auto object-contain"
+          />
+          <img
+            src="/images/logos/no-bg/1.5TP.png"
+            alt="ออฟเฟรนด์"
+            class="logo-dark h-9 sm:h-10 w-auto object-contain drop-shadow-[0_0_12px_rgba(56,189,248,0.4)]"
+          />
+          <div class="flex flex-col justify-center">
+            <span
+              class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight"
+            >
+              ออฟเฟรนด์
+            </span>
+            <span
+              class="text-[10px] font-medium text-slate-500 dark:text-slate-400 tracking-normal leading-none mt-0.5"
+            >
+              เพื่อนคู่คิดคนออฟฟิศ
+            </span>
+          </div>
+        </a>
+
+        <!-- Close Button [X] with Lucide icon -->
+        <button
+          id="mobile-drawer-close-btn"
+          type="button"
+          class="w-10 h-10 rounded-lg border border-slate-200 dark:border-white/15 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white bg-slate-50 dark:bg-white/5 cursor-pointer focus:outline-none"
+          aria-label="Close Mobile Menu"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      <!-- Mobile Search Button (Opens Search Modal) -->
+      <button
+        type="button"
+        id="mobile-search-trigger-btn"
+        data-open-search-modal
+        class="w-full flex items-center justify-between bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10 mb-5 px-3.5 py-2.5 text-xs text-slate-400 cursor-pointer hover:border-[#38bdf8] transition-colors text-left"
+      >
+        <span>ค้นหาผลงาน, บริการ, เครื่องมือ...</span>
+        <Search className="w-4 h-4 text-slate-400" />
+      </button>
+
+      <!-- Vertical Menu Items -->
+      <nav
+        class="space-y-2 font-bold text-slate-800 dark:text-slate-200 text-base"
+      >
+        <a
+          href="/services"
+          class:list={[
+            "block px-3.5 py-2.5 rounded-lg transition-all",
+            "hover:bg-sky-50 dark:hover:bg-white/10 hover:text-[#162d59] dark:hover:text-[#93c5fd]",
+            currentPath.startsWith("/services")
+              ? "bg-sky-50/80 dark:bg-white/5 text-[#162d59] dark:text-[#38bdf8] border-l-[3px] border-[#e8624f]"
+              : "",
+          ]}
+        >
+          บริการ
+        </a>
+
+        <a
+          href="/projects"
+          class:list={[
+            "block px-3.5 py-2.5 rounded-lg transition-all",
+            "hover:bg-sky-50 dark:hover:bg-white/10 hover:text-[#162d59] dark:hover:text-[#93c5fd]",
+            currentPath === "/projects"
+              ? "bg-sky-50/80 dark:bg-white/5 text-[#162d59] dark:text-[#38bdf8] border-l-[3px] border-[#e8624f]"
+              : "",
+          ]}
+        >
+          ผลงาน
+        </a>
+
+        <a
+          href="/#enterprise-solutions"
+          class:list={[
+            "flex items-center justify-between px-3.5 py-2.5 rounded-lg transition-all",
+            "hover:bg-sky-50 dark:hover:bg-white/10 hover:text-[#162d59] dark:hover:text-[#93c5fd]",
+            currentPath.includes("enterprise")
+              ? "bg-sky-50/80 dark:bg-white/5 text-[#162d59] dark:text-[#38bdf8] border-l-[3px] border-[#e8624f]"
+              : "",
+          ]}
+        >
+          <span>สำหรับองค์กร</span>
+          <ChevronDown className="w-4 h-4 opacity-50" />
+        </a>
+
+        <a
+          href="/blog"
+          class:list={[
+            "block px-3.5 py-2.5 rounded-lg transition-all",
+            "hover:bg-sky-50 dark:hover:bg-white/10 hover:text-[#162d59] dark:hover:text-[#93c5fd]",
+            currentPath.startsWith("/blog")
+              ? "bg-sky-50/80 dark:bg-white/5 text-[#162d59] dark:text-[#38bdf8] border-l-[3px] border-[#e8624f]"
+              : "",
+          ]}
+        >
+          บทความ
+        </a>
+
+        <a
+          href="/team"
+          class:list={[
+            "flex items-center justify-between px-3.5 py-2.5 rounded-lg transition-all",
+            "hover:bg-sky-50 dark:hover:bg-white/10 hover:text-[#162d59] dark:hover:text-[#93c5fd]",
+            currentPath.startsWith("/team") || currentPath.startsWith("/about")
+              ? "bg-sky-50/80 dark:bg-white/5 text-[#162d59] dark:text-[#38bdf8] border-l-[3px] border-[#e8624f]"
+              : "",
+          ]}
+        >
+          <span>บุคลากร</span>
+        </a>
+
+        <a
+          href="/contact"
+          class:list={[
+            "block px-3.5 py-2.5 rounded-lg transition-all",
+            "hover:bg-sky-50 dark:hover:bg-white/10 hover:text-[#162d59] dark:hover:text-[#93c5fd]",
+            currentPath === "/contact"
+              ? "bg-sky-50/80 dark:bg-white/5 text-[#162d59] dark:text-[#38bdf8] border-l-[3px] border-[#e8624f]"
+              : "",
+          ]}
+        >
+          ติดต่อเรา
+        </a>
+      </nav>
+    </div>
+
+    <!-- Drawer Bottom: Theme Switch + Language Pills + CTA Button (No Emojis) -->
+    <div class="pt-6 border-t border-slate-200 dark:border-white/10 space-y-5">
+      <div class="flex items-center justify-between">
+        <!-- ธีม (Lucide Sun/Moon Icons) -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400"
+            >ธีม</span
+          >
+          <ThemeToggle variant="switch" />
+        </div>
+
+        <!-- ภาษา [ TH | EN ] -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400"
+            >ภาษา</span
+          >
+          <div
+            class="inline-flex items-center p-1 rounded-full border border-slate-300 dark:border-white/20 bg-slate-100 dark:bg-white/10 text-xs font-bold"
+          >
+            <button
+              type="button"
+              class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#162d59] to-[#0a2d38] text-white"
+              >TH</button
+            >
+            <button
+              type="button"
+              class="px-2.5 py-0.5 rounded-full text-slate-600 dark:text-slate-400"
+              >EN</button
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Full-width prominent CTA button at bottom of drawer (Solid Orange) -->
+      <a
+        href="/contact"
+        class="w-full block text-center py-3.5 px-4 rounded-lg font-bold text-base text-white bg-orange-500 hover:bg-orange-600 shadow-sm hover:shadow-md hover:shadow-orange-500/25 transition-all cursor-pointer"
+      >
+        สอบถามบริการ
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setupMobileDrawer() {
+    const openBtn = document.getElementById("mobile-drawer-open-btn");
+    const closeBtn = document.getElementById("mobile-drawer-close-btn");
+    const backdrop = document.getElementById("mobile-drawer-backdrop");
+    const drawer = document.getElementById("mobile-drawer");
+    const mobileSearchBtn = document.getElementById("mobile-search-trigger-btn");
+
+    if (!drawer) return;
+
+    const openDrawer = () => {
+      drawer.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    };
+
+    const closeDrawer = () => {
+      drawer.classList.add("hidden");
+      document.body.style.overflow = "";
+    };
+
+    if (openBtn) openBtn.onclick = openDrawer;
+    if (closeBtn) closeBtn.onclick = closeDrawer;
+    if (backdrop) backdrop.onclick = closeDrawer;
+    if (mobileSearchBtn) {
+      mobileSearchBtn.addEventListener("click", closeDrawer);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupMobileDrawer);
+  } else {
+    setupMobileDrawer();
+  }
+  document.addEventListener("astro:page-load", setupMobileDrawer);
+</script>

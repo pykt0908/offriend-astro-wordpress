@@ -1,0 +1,265 @@
+---
+// CookieConsent.astro — PDPA Compliant Cookie Banner & Settings Modal
+---
+
+<div
+  id="cookie-consent-banner"
+  class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 max-w-[440px] w-[calc(100%-2rem)] hidden opacity-0 translate-y-3 transition-all duration-300 select-none"
+  role="region"
+  aria-label="การตั้งค่าคุกกี้และความเป็นส่วนตัว"
+>
+  <div
+    class="bg-white dark:bg-[#0c1222] border border-slate-200/90 dark:border-white/10 rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4"
+  >
+    <!-- Header -->
+    <div class="space-y-2">
+      <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
+        เว็บไซต์นี้ใช้คุกกี้
+      </h3>
+      <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+        เราใช้คุกกี้ที่จำเป็นเพื่อให้เว็บไซต์ทำงานได้ และจะใช้คุกกี้ประเภทอื่นเมื่อได้รับความยินยอมจากคุณเท่านั้น{' '}
+        <a
+          href="/cookie-policy"
+          class="text-[#162d59] dark:text-[#38bdf8] underline font-bold hover:opacity-80 transition-opacity"
+        >
+          อ่านนโยบายคุกกี้
+        </a>
+      </p>
+    </div>
+
+    <!-- VIEW 1: Simple / Default (Collapsed) -->
+    <div id="cookie-view-simple" class="flex items-center gap-2 pt-1">
+      <button
+        type="button"
+        id="btn-cookie-accept-all-1"
+        class="bg-[#162d59] hover:bg-[#0a192f] text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-lg flex-1 text-center transition-colors cursor-pointer shadow-xs"
+      >
+        ยอมรับทั้งหมด
+      </button>
+
+      <button
+        type="button"
+        id="btn-cookie-reject"
+        class="bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 text-xs sm:text-sm font-bold px-3 py-2.5 rounded-lg flex-1 text-center transition-colors cursor-pointer"
+      >
+        ปฏิเสธที่ไม่จำเป็น
+      </button>
+
+      <button
+        type="button"
+        id="btn-cookie-settings"
+        class="text-[#162d59] dark:text-[#38bdf8] underline text-xs sm:text-sm font-bold px-2 py-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0"
+      >
+        ตั้งค่า
+      </button>
+    </div>
+
+    <!-- VIEW 2: Detailed / Settings (Expanded) -->
+    <div id="cookie-view-settings" class="hidden space-y-2.5 pt-1">
+      <!-- 1. คุกกี้ที่จำเป็น (Locked ON) -->
+      <div class="p-3 sm:p-3.5 rounded-xl border border-slate-200/80 dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02] flex items-center justify-between gap-3">
+        <div class="space-y-0.5 pr-2">
+          <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block">
+            คุกกี้ที่จำเป็น
+          </span>
+          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-normal leading-normal">
+            ให้เว็บไซต์และฟอร์มทำงานได้ และจำตัวเลือกนี้ · ปิดไม่ได้
+          </p>
+        </div>
+        <!-- Toggle: Locked ON -->
+        <div class="relative inline-flex items-center shrink-0 cursor-not-allowed">
+          <div class="w-11 h-6 bg-[#162d59]/70 dark:bg-[#38bdf8]/70 rounded-full p-0.5 transition-colors">
+            <div class="w-5 h-5 bg-white rounded-full shadow-xs transform translate-x-5 transition-transform"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. เนื้อหาจากภายนอก -->
+      <label class="p-3 sm:p-3.5 rounded-xl border border-slate-200/80 dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02] flex items-center justify-between gap-3 cursor-pointer hover:border-slate-300 dark:hover:border-white/10 transition-colors">
+        <div class="space-y-0.5 pr-2">
+          <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block">
+            เนื้อหาจากภายนอก
+          </span>
+          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-normal leading-normal">
+            แผนที่ Google Maps ในหน้าติดต่อเรา ผู้ให้บริการอาจบันทึกคุกกี้ของตน
+          </p>
+        </div>
+        <!-- Toggle Switch -->
+        <input type="checkbox" id="cookie-toggle-external" class="sr-only peer" />
+        <div class="relative w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#162d59] dark:peer-checked:bg-[#38bdf8] shrink-0"></div>
+      </label>
+
+      <!-- 3. คุกกี้เพื่อการวิเคราะห์ -->
+      <label class="p-3 sm:p-3.5 rounded-xl border border-slate-200/80 dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02] flex items-center justify-between gap-3 cursor-pointer hover:border-slate-300 dark:hover:border-white/10 transition-colors">
+        <div class="space-y-0.5 pr-2">
+          <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block">
+            คุกกี้เพื่อการวิเคราะห์
+          </span>
+          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-normal leading-normal">
+            Google Analytics นับผู้เข้าชมและหน้าที่เข้าชม เพื่อปรับปรุงเว็บไซต์
+          </p>
+        </div>
+        <!-- Toggle Switch -->
+        <input type="checkbox" id="cookie-toggle-analytics" class="sr-only peer" />
+        <div class="relative w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#162d59] dark:peer-checked:bg-[#38bdf8] shrink-0"></div>
+      </label>
+
+      <!-- 4. คุกกี้เพื่อการตลาด -->
+      <label class="p-3 sm:p-3.5 rounded-xl border border-slate-200/80 dark:border-white/5 bg-slate-50/70 dark:bg-white/[0.02] flex items-center justify-between gap-3 cursor-pointer hover:border-slate-300 dark:hover:border-white/10 transition-colors">
+        <div class="space-y-0.5 pr-2">
+          <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block">
+            คุกกี้เพื่อการตลาด
+          </span>
+          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-normal leading-normal">
+            Google Ads และ Meta (Facebook) Pixel วัดผลโฆษณา และแสดงโฆษณาที่เกี่ยวข้อง
+          </p>
+        </div>
+        <!-- Toggle Switch -->
+        <input type="checkbox" id="cookie-toggle-marketing" class="sr-only peer" />
+        <div class="relative w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#162d59] dark:peer-checked:bg-[#38bdf8] shrink-0"></div>
+      </label>
+
+      <!-- Settings Action Buttons -->
+      <div class="flex items-center gap-2 pt-2">
+        <button
+          type="button"
+          id="btn-cookie-accept-all-2"
+          class="bg-[#162d59] hover:bg-[#0a192f] text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-lg flex-1 text-center transition-colors cursor-pointer shadow-xs"
+        >
+          ยอมรับทั้งหมด
+        </button>
+
+        <button
+          type="button"
+          id="btn-cookie-save-settings"
+          class="bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 text-xs sm:text-sm font-bold px-4 py-2.5 rounded-lg flex-1 text-center transition-colors cursor-pointer"
+        >
+          บันทึกการตั้งค่า
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  interface CookiePreferences {
+    essential: boolean;
+    external: boolean;
+    analytics: boolean;
+    marketing: boolean;
+    timestamp: string;
+  }
+
+  const STORAGE_KEY = 'offriend_cookie_consent_v1';
+
+  function initCookieConsent() {
+    const banner = document.getElementById('cookie-consent-banner');
+    const viewSimple = document.getElementById('cookie-view-simple');
+    const viewSettings = document.getElementById('cookie-view-settings');
+    const btnSettings = document.getElementById('btn-cookie-settings');
+    const btnAccept1 = document.getElementById('btn-cookie-accept-all-1');
+    const btnAccept2 = document.getElementById('btn-cookie-accept-all-2');
+    const btnReject = document.getElementById('btn-cookie-reject');
+    const btnSaveSettings = document.getElementById('btn-cookie-save-settings');
+
+    const toggleExternal = document.getElementById('cookie-toggle-external') as HTMLInputElement | null;
+    const toggleAnalytics = document.getElementById('cookie-toggle-analytics') as HTMLInputElement | null;
+    const toggleMarketing = document.getElementById('cookie-toggle-marketing') as HTMLInputElement | null;
+
+    if (!banner) return;
+
+    // Check existing consent
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) {
+      showBanner(false);
+    } else {
+      try {
+        const prefs: CookiePreferences = JSON.parse(saved);
+        if (toggleExternal) toggleExternal.checked = prefs.external;
+        if (toggleAnalytics) toggleAnalytics.checked = prefs.analytics;
+        if (toggleMarketing) toggleMarketing.checked = prefs.marketing;
+      } catch (e) {
+        // ignore parse error
+      }
+    }
+
+    function showBanner(openDirectlyToSettings = false) {
+      if (!banner) return;
+      if (openDirectlyToSettings) {
+        if (viewSimple) viewSimple.classList.add('hidden');
+        if (viewSettings) viewSettings.classList.remove('hidden');
+      } else {
+        if (viewSimple) viewSimple.classList.remove('hidden');
+        if (viewSettings) viewSettings.classList.add('hidden');
+      }
+
+      banner.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        banner.classList.remove('opacity-0', 'translate-y-3');
+        banner.classList.add('opacity-100', 'translate-y-0');
+      });
+    }
+
+    function hideBanner() {
+      if (!banner) return;
+      banner.classList.add('opacity-0', 'translate-y-3');
+      banner.classList.remove('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 300);
+    }
+
+    function savePreferences(external: boolean, analytics: boolean, marketing: boolean) {
+      const prefs: CookiePreferences = {
+        essential: true,
+        external,
+        analytics,
+        marketing,
+        timestamp: new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+      hideBanner();
+
+      // Trigger custom event so analytics/tags can respond
+      window.dispatchEvent(new CustomEvent('cookie-preferences-updated', { detail: prefs }));
+    }
+
+    // Handlers
+    if (btnSettings) {
+      btnSettings.onclick = () => {
+        if (viewSimple) viewSimple.classList.add('hidden');
+        if (viewSettings) viewSettings.classList.remove('hidden');
+      };
+    }
+
+    const handleAcceptAll = () => {
+      savePreferences(true, true, true);
+    };
+
+    if (btnAccept1) btnAccept1.onclick = handleAcceptAll;
+    if (btnAccept2) btnAccept2.onclick = handleAcceptAll;
+
+    if (btnReject) {
+      btnReject.onclick = () => {
+        savePreferences(false, false, false);
+      };
+    }
+
+    if (btnSaveSettings) {
+      btnSaveSettings.onclick = () => {
+        savePreferences(
+          toggleExternal ? toggleExternal.checked : false,
+          toggleAnalytics ? toggleAnalytics.checked : false,
+          toggleMarketing ? toggleMarketing.checked : false
+        );
+      };
+    }
+
+    // Listen to global open event (e.g. from footer link or cookie policy page)
+    window.addEventListener('open-cookie-consent', () => {
+      showBanner(true);
+    });
+  }
+
+  document.addEventListener('astro:page-load', initCookieConsent);
+</script>

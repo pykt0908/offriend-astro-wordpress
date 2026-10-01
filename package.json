@@ -1,0 +1,11 @@
+{
+  "name": "offriend-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Headless WordPress + Astro Project with Local XAMPP MySQL",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "preview": "npm --prefix frontend run preview"
+  }
+}

@@ -1,0 +1,349 @@
+---
+import {
+  Search as SearchIcon,
+  X,
+  Laptop,
+  Briefcase,
+  FileText,
+  Wrench,
+  ArrowRight,
+  Sparkles,
+} from 'lucide-react';
+
+
+
+const popularTechs = [
+  { name: 'Excel & Sheets', count: 27, iconColor: 'text-emerald-600 dark:text-emerald-400', tag: 'Excel', query: 'Excel' },
+  { name: 'Next.js', count: 22, iconColor: 'text-slate-900 dark:text-white', tag: 'Next.js', query: 'Next.js' },
+  { name: 'Python', count: 19, iconColor: 'text-amber-500', tag: 'Python', query: 'Python' },
+  { name: 'React', count: 17, iconColor: 'text-sky-500', tag: 'React', query: 'React' },
+  { name: 'WordPress', count: 15, iconColor: 'text-blue-600', tag: 'WordPress', query: 'WordPress' },
+  { name: 'JavaScript', count: 14, iconColor: 'text-yellow-500', tag: 'JS', query: 'JavaScript' },
+  { name: 'Astro', count: 14, iconColor: 'text-purple-500', tag: 'Astro', query: 'Astro' },
+  { name: 'Cloud & AWS', count: 13, iconColor: 'text-orange-500', tag: 'AWS', query: 'Cloud' },
+  { name: 'AI & Prompts', count: 12, iconColor: 'text-cyan-500', tag: 'AI', query: 'AI' },
+  { name: 'SQL & Database', count: 11, iconColor: 'text-rose-500', tag: 'SQL', query: 'ระบบ' },
+];
+---
+
+<!-- Full-screen Search Overlay Modal matching user screenshot -->
+<div
+  id="search-modal-overlay"
+  class="fixed inset-0 z-[120] hidden bg-white dark:bg-[#070b14] overflow-y-auto animate-in fade-in duration-150"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-search-input"
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-16 space-y-6 sm:space-y-8">
+    
+    <!-- Top Search Input Bar (Large rounded with teal border) -->
+    <div class="relative">
+      <form action="/search" method="get" id="modal-search-form" class="relative">
+        <div
+          class="flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-3.5 rounded-2xl sm:rounded-full bg-white dark:bg-[#0c1222] border-2 border-[#38bdf8] shadow-sm focus-within:ring-4 focus-within:ring-[#38bdf8]/20 transition-all"
+        >
+          <SearchIcon className="w-5 h-5 text-slate-400 shrink-0" />
+          
+          <input
+            type="text"
+            id="modal-search-input"
+            name="q"
+            placeholder="ค้นหาผลงาน, บริการ, บทความ, เครื่องมือ..."
+            autocomplete="off"
+            class="w-full text-slate-900 dark:text-white placeholder-slate-400 text-sm sm:text-base font-medium focus:outline-none bg-transparent"
+          />
+
+          <!-- Close button [X] -->
+          <button
+            type="button"
+            id="modal-search-close-btn"
+            aria-label="ปิดหน้าต่างค้นหา"
+            class="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 1. DEFAULT VIEW: โปรแกรมยอดนิยม (when search input is empty) -->
+    <div id="modal-search-default-view" class="space-y-6 animate-in fade-in duration-150">
+
+      <!-- โปรแกรมและเทคโนโลยียอดนิยม (Grid of Cards) -->
+      <div>
+        <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 tracking-wide">
+          โปรแกรมและเทคโนโลยียอดนิยม
+        </h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          {
+            popularTechs.map((tech) => (
+              <button
+                type="button"
+                class="modal-quick-tech p-3 rounded-xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#0c1222] hover:border-[#38bdf8] dark:hover:border-[#38bdf8] hover:shadow-sm transition-all cursor-pointer text-left flex items-center justify-between group shadow-2xs"
+                data-keyword={tech.query}
+              >
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class={`font-mono text-xs font-black ${tech.iconColor} shrink-0`}>
+                    {tech.tag}
+                  </span>
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-[#162d59] dark:group-hover:text-[#38bdf8] transition-colors truncate">
+                    {tech.name}
+                  </span>
+                </div>
+                <span class="text-[11px] font-medium text-slate-400 shrink-0 ml-1.5">
+                  {tech.count}
+                </span>
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 2. LIVE RESULTS VIEW (shown dynamically when typing) -->
+    <div id="modal-search-results-view" class="hidden space-y-6 animate-in fade-in duration-150">
+      <!-- Loading State -->
+      <div id="modal-search-loading" class="hidden py-12 text-center text-slate-500 dark:text-slate-400 space-y-3">
+        <div class="inline-block animate-spin rounded-full h-7 w-7 border-2 border-[#38bdf8] border-t-transparent"></div>
+        <p class="text-xs sm:text-sm">กำลังค้นหาข้อมูลทุกหมวดหมู่...</p>
+      </div>
+
+      <!-- Injected Results Container -->
+      <div id="modal-search-results-content" class="space-y-6"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function setupSearchModal() {
+    const overlay = document.getElementById('search-modal-overlay');
+    const input = document.getElementById('modal-search-input') as HTMLInputElement | null;
+    const closeBtn = document.getElementById('modal-search-close-btn');
+    const defaultView = document.getElementById('modal-search-default-view');
+    const resultsView = document.getElementById('modal-search-results-view');
+    const resultsContent = document.getElementById('modal-search-results-content');
+    const loadingState = document.getElementById('modal-search-loading');
+
+    if (!overlay || !input || !defaultView || !resultsView || !resultsContent) return;
+
+    let debounceTimer: any = null;
+
+    // Open Modal
+    function openModal(initialQuery = '') {
+      overlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      if (initialQuery) {
+        input.value = initialQuery;
+        handleSearch(initialQuery);
+      }
+      setTimeout(() => {
+        input.focus();
+        if (input.value) {
+          input.select();
+        }
+      }, 50);
+    }
+
+    // Close Modal
+    function closeModal() {
+      overlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // Attach open triggers to all elements with data-open-search-modal
+    document.querySelectorAll('[data-open-search-modal]').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal();
+      });
+    });
+
+    // Close triggers
+    if (closeBtn) closeBtn.onclick = closeModal;
+
+    // Keyboard Shortcuts (Ctrl+K, Cmd+K, Escape)
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (overlay.classList.contains('hidden')) {
+          openModal();
+        } else {
+          closeModal();
+        }
+      } else if (e.key === 'Escape' && !overlay.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+
+    // Quick Keyword and Tech Pills Click Handlers
+    document.querySelectorAll('.modal-quick-keyword, .modal-quick-tech').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const kw = btn.getAttribute('data-keyword') || '';
+        if (kw) {
+          input.value = kw;
+          handleSearch(kw);
+          input.focus();
+        }
+      });
+    });
+
+    // Search Input Listener
+    input.addEventListener('input', () => {
+      const q = input.value.trim();
+      clearTimeout(debounceTimer);
+      if (!q) {
+        defaultView.classList.remove('hidden');
+        resultsView.classList.add('hidden');
+        resultsContent.innerHTML = '';
+        return;
+      }
+      debounceTimer = setTimeout(() => {
+        handleSearch(q);
+      }, 200);
+    });
+
+    async function handleSearch(q: string) {
+      if (!q) return;
+
+      defaultView.classList.add('hidden');
+      resultsView.classList.remove('hidden');
+      if (loadingState) loadingState.classList.remove('hidden');
+      resultsContent.innerHTML = '';
+
+      try {
+        const res = await fetch(`/api/search.json?q=${encodeURIComponent(q)}`);
+        if (!res.ok) throw new Error('Search failed');
+        const data = await res.json();
+
+        if (loadingState) loadingState.classList.add('hidden');
+
+        // Check if query is still current
+        if (input.value.trim() !== q) return;
+
+        if (!data || data.total === 0) {
+          resultsContent.innerHTML = `
+            <div class="py-12 text-center rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-[#0c1222] p-8 space-y-3">
+              <h3 class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200">
+                ไม่พบผลการค้นหาสำหรับ "${escapeHtml(q)}"
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                ลองตรวจสอบตัวสะกด หรือคลิกเลือกคำค้นหายอดนิยมด้านล่าง
+              </p>
+            </div>
+          `;
+          return;
+        }
+
+        const categoryBadgeMap: Record<string, { label: string; class: string }> = {
+          services: { label: 'บริการ', class: 'bg-[#162d59]/10 dark:bg-[#38bdf8]/15 text-[#162d59] dark:text-[#38bdf8]' },
+          projects: { label: 'ผลงาน', class: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400' },
+          articles: { label: 'บทความ', class: 'bg-amber-500/10 text-amber-700 dark:text-amber-400' },
+          tools: { label: 'เครื่องมือ', class: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' },
+        };
+
+        const catNames: Array<{ key: string; name: string }> = [
+          { key: 'services', name: 'บริการ' },
+          { key: 'projects', name: 'ผลงาน' },
+          { key: 'articles', name: 'บทความ' },
+          { key: 'tools', name: 'เครื่องมือ' },
+        ];
+
+        let cardsHtml = '';
+
+        catNames.forEach(({ key, name }) => {
+          const items = data.categorized?.[key] || [];
+          if (items.length > 0) {
+            const badge = categoryBadgeMap[key] || { label: name, class: 'bg-slate-100 text-slate-700' };
+
+            const itemsList = items
+              .map(
+                (item: any) => `
+                <a
+                  href="${escapeHtml(item.url)}"
+                  class="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#0c1222] hover:border-[#38bdf8] dark:hover:border-[#38bdf8] hover:shadow-md transition-all gap-3"
+                >
+                  <div class="space-y-1.5 flex-grow pr-2">
+                    <div class="flex items-center gap-2">
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${badge.class}">
+                        ${badge.label}
+                      </span>
+                      ${item.subtitle ? `<span class="text-[11px] text-slate-400">· ${escapeHtml(item.subtitle)}</span>` : ''}
+                    </div>
+                    <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-[#162d59] dark:group-hover:text-[#38bdf8] transition-colors leading-snug">
+                      ${escapeHtml(item.title)}
+                    </h4>
+                    ${item.description ? `<p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">${escapeHtml(item.description)}</p>` : ''}
+                  </div>
+                  <div class="shrink-0 pt-2 sm:pt-0">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 dark:bg-white/5 group-hover:bg-[#162d59] group-hover:text-white dark:group-hover:bg-[#38bdf8] dark:group-hover:text-slate-950 text-slate-700 dark:text-slate-300 transition-colors">
+                      <span>เปิดดู</span>
+                      <span>→</span>
+                    </span>
+                  </div>
+                </a>
+              `
+              )
+              .join('');
+
+            cardsHtml += `
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <span>${name}</span>
+                    <span class="px-1.5 py-0.2 rounded text-[10px] bg-slate-200 dark:bg-white/10 font-bold">${items.length}</span>
+                  </h4>
+                </div>
+                <div class="space-y-2.5">${itemsList}</div>
+              </div>
+            `;
+          }
+        });
+
+        resultsContent.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-white/10">
+            <h3 class="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200">
+              พบข้อมูลทั้งหมด <span class="text-[#162d59] dark:text-[#38bdf8] font-black">${data.total} รายการ</span> สำหรับ "${escapeHtml(q)}"
+            </h3>
+            <a
+              href="/search?q=${encodeURIComponent(q)}"
+              class="inline-flex items-center gap-1.5 text-xs font-bold text-[#162d59] dark:text-[#38bdf8] hover:underline"
+            >
+              <span>ดูผลลัพธ์ทั้งหมดในหน้าค้นหา</span>
+              <span>→</span>
+            </a>
+          </div>
+
+          <div class="space-y-6">
+            ${cardsHtml}
+          </div>
+        `;
+      } catch (err) {
+        if (loadingState) loadingState.classList.add('hidden');
+        resultsContent.innerHTML = `
+          <div class="p-8 text-center text-slate-500">
+            <p class="text-xs sm:text-sm">เกิดข้อผิดพลาดในการค้นหา กรุณาลองใหม่อีกครั้ง</p>
+          </div>
+        `;
+      }
+    }
+
+    function escapeHtml(str: string): string {
+      return (str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  }
+
+  // Run on first load and on client router navigation
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupSearchModal);
+  } else {
+    setupSearchModal();
+  }
+  document.addEventListener('astro:page-load', setupSearchModal);
+</script>

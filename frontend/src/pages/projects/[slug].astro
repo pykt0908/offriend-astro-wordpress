@@ -1,0 +1,408 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getProjectsFromWP, getProjectBySlug } from '../../lib/wordpress';
+import {
+  Building2,
+  Calendar,
+  MapPin,
+  Maximize2,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  MessageCircle,
+  Share2,
+} from 'lucide-react';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const rawProject = await getProjectBySlug(slug as string);
+
+if (!rawProject) {
+  return Astro.redirect('/projects');
+}
+
+const allProjects = await getProjectsFromWP();
+const defaultImages: Record<string, string> = {
+  'nextjs-advanced-egat': '/images/contact-seminar.jpg',
+  'workshop-fullstack-nextjs-bts': '/images/solutions/web-development.jpg',
+  'corporate-cloud-devops-mea': '/images/solutions/enterprise-consult.jpg',
+  'headless-wp-astro-enterprise-nstda': '/images/solutions/office-tools.jpg',
+};
+
+const meta = rawProject.project_meta || {};
+const project = {
+  slug: rawProject.slug,
+  title: rawProject.title?.rendered || '',
+  category: meta.category_tag || 'ผลงานโครงการ',
+  client: meta.client || 'องค์กรพันธมิตร',
+  location: 'กรุงเทพมหานคร',
+  date: meta.year || '2569',
+  subtitle: rawProject.title?.rendered || '',
+  image: rawProject.featured_image_url || defaultImages[rawProject.slug] || '/images/contact-seminar.jpg',
+  imageAlt: rawProject.title?.rendered || '',
+  excerpt: rawProject.excerpt?.rendered?.replace(/<[^>]*>?/gm, '').trim() || rawProject.content?.rendered?.replace(/<[^>]*>?/gm, '').trim() || '',
+  details: {
+    description: rawProject.content?.rendered?.replace(/<[^>]*>?/gm, '').trim() || '',
+    objectives: meta.metrics || [],
+    topics: meta.tech_stack || [],
+    outcomes: meta.metrics || [],
+  },
+  gallery: [
+    {
+      url: rawProject.featured_image_url || defaultImages[rawProject.slug] || '/images/contact-seminar.jpg',
+      caption: rawProject.title?.rendered || '',
+    },
+    {
+      url: '/images/solutions/web-development.jpg',
+      caption: 'ช่วงลงมือทำ Hands-on Workshop และการพัฒนาจริง',
+    },
+    {
+      url: '/images/solutions/enterprise-consult.jpg',
+      caption: 'การอภิปรายและตอบข้อซักถามเชิงลึกเกี่ยวกับสถาปัตยกรรมระบบ',
+    },
+    {
+      url: '/images/solutions/office-tools.jpg',
+      caption: 'การทดสอบประสิทธิภาพและ Performance Benchmarking',
+    },
+  ],
+  techStack: meta.tech_stack && meta.tech_stack.length > 0 ? meta.tech_stack : ['Next.js', 'React', 'TypeScript'],
+};
+
+// Recent projects for the sidebar (excluding current project)
+const recentProjects = allProjects
+  .filter((p) => p.slug !== project.slug)
+  .slice(0, 5)
+  .map((p) => ({
+    slug: p.slug,
+    title: p.title?.rendered || '',
+    category: p.project_meta?.category_tag || 'ผลงานทั่วไป',
+    image: p.featured_image_url || defaultImages[p.slug] || '/images/contact-seminar.jpg',
+    imageAlt: p.title?.rendered || '',
+    date: p.project_meta?.year || '2569',
+  }));
+
+const pageTitle = `${project.title} — ผลงานและโครงการจริง | Offriend`;
+
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={project.excerpt}
+  image={project.image}
+>
+  <div class="py-8 sm:py-12 bg-white dark:bg-[#070b14] transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- 2-COLUMN EDITORIAL LAYOUT (Main Article + Right Sidebar) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        
+        <!-- LEFT COLUMN: MAIN CONTENT (8 Cols) -->
+        <main class="lg:col-span-8 space-y-6 sm:space-y-8">
+          
+          <!-- 1. Breadcrumbs: หน้าแรก / ผลงานของเรา / [ชื่อหมวดหมู่] -->
+          <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+            <a href="/" class="hover:text-[#162d59] dark:hover:text-[#38bdf8] transition-colors">หน้าแรก</a>
+            <span class="text-slate-300 dark:text-slate-600">/</span>
+            <a href="/projects" class="hover:text-[#162d59] dark:hover:text-[#38bdf8] transition-colors">ผลงานของเรา</a>
+            <span class="text-slate-300 dark:text-slate-600">/</span>
+            <span class="text-slate-700 dark:text-slate-300 font-medium">{project.category}</span>
+          </nav>
+
+          <!-- 2. Header Section: Category, Title, Meta info -->
+          <div class="space-y-3">
+            <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#162d59] dark:text-[#38bdf8]">
+              {project.category}
+            </span>
+
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+              {project.title}
+            </h1>
+
+            <!-- Meta info with icons (Matching Reference Image) -->
+            <div class="flex flex-wrap items-center gap-y-2 gap-x-4 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
+              <!-- Organization / Client -->
+              <div class="inline-flex items-center gap-1.5">
+                <Building2 className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8] shrink-0" />
+                <span>{project.client}</span>
+              </div>
+
+              <!-- Location -->
+              <div class="inline-flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8] shrink-0" />
+                <span>{project.location}</span>
+              </div>
+
+              <!-- Date -->
+              <div class="inline-flex items-center gap-1.5">
+                <Calendar className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8] shrink-0" />
+                <span>{project.date}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Subtitle / Headline -->
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white pt-2 leading-snug">
+            {project.subtitle}
+          </h2>
+
+          <!-- 4. Main Featured Image (Clickable for Lightbox) -->
+          <div
+            class="lightbox-trigger relative group rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/90 dark:border-white/10 shadow-md bg-slate-100 dark:bg-slate-800 cursor-zoom-in"
+            data-img-src={project.image}
+            data-caption={project.title}
+          >
+            <img
+              src={project.image}
+              alt={project.imageAlt}
+              class="w-full h-auto max-h-[500px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              loading="eager"
+            />
+            <div class="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span class="p-3 rounded-full bg-black/60 text-white backdrop-blur-md shadow-lg">
+                <Maximize2 className="w-5 h-5" />
+              </span>
+            </div>
+          </div>
+
+          <!-- รายละเอียดงาน (Matching Screenshot) -->
+          <div class="space-y-3 pt-2">
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+              <span class="w-1.5 h-6 bg-[#00736e] rounded-full inline-block shrink-0"></span>
+              <span>รายละเอียดงาน</span>
+            </h2>
+            <p class="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed font-normal">
+              {project.details.description}
+            </p>
+          </div>
+
+          <!-- ภาพบรรยากาศ (Matching Screenshot) -->
+          <div class="space-y-4 pt-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+              <span class="w-1.5 h-6 bg-[#00736e] rounded-full inline-block shrink-0"></span>
+              <span>ภาพบรรยากาศ</span>
+            </h2>
+
+            <!-- Gallery Grid (2 columns matching screenshot) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {
+                project.gallery.map((item, index) => (
+                  <div
+                    class="lightbox-trigger group relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200/80 dark:border-white/10 bg-slate-100 dark:bg-slate-800 cursor-zoom-in shadow-xs hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+                    data-img-src={item.url}
+                    data-caption={item.caption}
+                    data-index={index}
+                  >
+                    <img
+                      src={item.url}
+                      alt={item.caption}
+                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div class="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3">
+                      <span class="p-2 rounded-full bg-black/60 text-white backdrop-blur-xs">
+                        <Maximize2 className="w-4 h-4" />
+                      </span>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR (Matching Reference Image) (4 Cols) -->
+        <aside class="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
+          
+          <!-- Card 1: ผลงานล่าสุด (Matching Screenshot) -->
+          <div class="p-6 rounded-2xl bg-white dark:bg-[#0c1222] border border-slate-200/90 dark:border-white/10 shadow-xs">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4 pb-3 border-b border-slate-100 dark:border-white/10">
+              ผลงานล่าสุด
+            </h3>
+
+            <div class="divide-y divide-slate-100 dark:divide-white/10">
+              {
+                recentProjects.map((item) => (
+                  <div class="py-3.5 first:pt-0 last:pb-0 space-y-1.5">
+                    <a
+                      href={`/projects/${item.slug}`}
+                      class="block font-bold text-sm sm:text-base text-slate-900 dark:text-white hover:text-[#162d59] dark:hover:text-[#38bdf8] transition-colors leading-snug"
+                    >
+                      {item.title}
+                    </a>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                      <span>{item.client}</span>
+                      <span> · </span>
+                      <span>{item.date}</span>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+
+        </aside>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX MODAL OVERLAY -->
+  <div
+    id="project-lightbox"
+    class="fixed inset-0 z-[9999] hidden bg-black/90 backdrop-blur-md flex-col items-center justify-between p-4 sm:p-6 select-none opacity-0 transition-opacity duration-200"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Image Lightbox"
+  >
+    <!-- Top Bar: Counter & Close button -->
+    <div class="w-full max-w-5xl flex items-center justify-between text-white/90 z-10 pt-2">
+      <span id="lightbox-counter" class="text-xs sm:text-sm font-medium px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm">
+        1 / 1
+      </span>
+
+      <button
+        id="lightbox-close"
+        type="button"
+        aria-label="ปิดภาพขยาย"
+        class="p-2 sm:p-2.5 rounded-full bg-white/15 hover:bg-white/30 text-white transition-colors cursor-pointer"
+      >
+        <X className="w-5 h-5" />
+      </button>
+    </div>
+
+    <!-- Center: Main Image with Prev / Next arrows -->
+    <div class="relative w-full max-w-5xl flex-grow flex items-center justify-center my-auto px-4 sm:px-12">
+      <!-- Previous Button -->
+      <button
+        id="lightbox-prev"
+        type="button"
+        aria-label="รูปก่อนหน้า"
+        class="absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-white/15 hover:bg-white/30 text-white transition-colors cursor-pointer z-10"
+      >
+        <ChevronLeft className="w-6 h-6" />
+      </button>
+
+      <!-- Display Image -->
+      <div class="relative max-h-[75vh] sm:max-h-[80vh] flex items-center justify-center">
+        <img
+          id="lightbox-img"
+          src=""
+          alt=""
+          class="max-h-[75vh] sm:max-h-[80vh] max-w-[88vw] sm:max-w-[85vw] object-contain rounded-xl shadow-2xl transition-all duration-200"
+        />
+      </div>
+
+      <!-- Next Button -->
+      <button
+        id="lightbox-next"
+        type="button"
+        aria-label="รูปถัดไป"
+        class="absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 p-2.5 sm:p-3 rounded-full bg-white/15 hover:bg-white/30 text-white transition-colors cursor-pointer z-10"
+      >
+        <ChevronRight className="w-6 h-6" />
+      </button>
+    </div>
+
+    <!-- Bottom: Caption -->
+    <div class="w-full max-w-3xl text-center pb-2 z-10">
+      <p
+        id="lightbox-caption"
+        class="text-xs sm:text-sm text-white/90 font-medium px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm inline-block max-w-full truncate"
+      >
+      </p>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  function setupLightbox() {
+    const modal = document.getElementById('project-lightbox');
+    const imgElement = document.getElementById('lightbox-img') as HTMLImageElement | null;
+    const captionElement = document.getElementById('lightbox-caption');
+    const counterElement = document.getElementById('lightbox-counter');
+    const closeBtn = document.getElementById('lightbox-close');
+    const prevBtn = document.getElementById('lightbox-prev');
+    const nextBtn = document.getElementById('lightbox-next');
+
+    const triggers = Array.from(document.querySelectorAll<HTMLElement>('.lightbox-trigger'));
+    if (!modal || !imgElement || !triggers.length) return;
+
+    // Collect images data
+    const imagesList = triggers.map((t) => ({
+      src: t.getAttribute('data-img-src') || '',
+      caption: t.getAttribute('data-caption') || '',
+    })).filter((item) => item.src);
+
+    let currentIndex = 0;
+
+    function showImage(index: number) {
+      if (!imagesList.length) return;
+      currentIndex = (index + imagesList.length) % imagesList.length;
+      const item = imagesList[currentIndex];
+
+      if (imgElement) {
+        imgElement.src = item.src;
+        imgElement.alt = item.caption;
+      }
+      if (captionElement) {
+        captionElement.textContent = item.caption;
+        captionElement.style.display = item.caption ? '' : 'none';
+      }
+      if (counterElement) {
+        counterElement.textContent = `${currentIndex + 1} / ${imagesList.length}`;
+      }
+    }
+
+    function openLightbox(index: number) {
+      showImage(index);
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex';
+      requestAnimationFrame(() => {
+        modal.classList.add('opacity-100');
+        modal.classList.remove('opacity-0');
+      });
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      modal.classList.add('opacity-0');
+      modal.classList.remove('opacity-100');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }, 200);
+    }
+
+    // Attach click to triggers
+    triggers.forEach((trigger, idx) => {
+      trigger.addEventListener('click', () => {
+        openLightbox(idx);
+      });
+    });
+
+    if (closeBtn) closeBtn.onclick = closeLightbox;
+    if (prevBtn) prevBtn.onclick = (e) => { e.stopPropagation(); showImage(currentIndex - 1); };
+    if (nextBtn) nextBtn.onclick = (e) => { e.stopPropagation(); showImage(currentIndex + 1); };
+
+    // Click backdrop to close
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal || (e.target as HTMLElement).id === 'project-lightbox') {
+        closeLightbox();
+      }
+    });
+
+    // Keyboard navigation
+    function onKeyDown(e: KeyboardEvent) {
+      if (modal.classList.contains('hidden')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') showImage(currentIndex - 1);
+      if (e.key === 'ArrowRight') showImage(currentIndex + 1);
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+  }
+
+  document.addEventListener('astro:page-load', setupLightbox);
+</script>

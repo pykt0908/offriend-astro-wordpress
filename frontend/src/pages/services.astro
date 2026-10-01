@@ -1,0 +1,292 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { getServicesFromWP, getSiteSettings } from '../lib/wordpress';
+import {
+  Laptop,
+  Zap,
+  Sparkles,
+  CheckCircle2,
+  ArrowRight,
+  ArrowUpRight,
+  Smartphone,
+} from 'lucide-react';
+
+export const prerender = false;
+
+const [wpServices, siteSettings] = await Promise.all([
+  getServicesFromWP(),
+  getSiteSettings(),
+]);
+
+
+const defaultImages: Record<string, string> = {
+  'web-development': '/images/solutions/web-development.jpg',
+  'headless-cms': '/images/solutions/enterprise-consult.jpg',
+  'tech-consulting': '/images/solutions/office-tools.jpg',
+  'in-house-training': '/images/contact-seminar.jpg',
+};
+
+const defaultIcons = [Laptop, Zap, Sparkles, CheckCircle2];
+
+function decodeHtml(html: string) {
+  if (!html) return '';
+  return html
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+}
+
+const servicesList = wpServices.map((service, idx) => {
+  const wpTitle = decodeHtml(service.title?.rendered || '');
+  const titleTh = decodeHtml(service.service_meta?.title_th || '');
+  
+  // Display the title edited in WordPress as primary headline
+  const displayTitle = wpTitle || titleTh;
+  // If titleTh exists and is different from wpTitle, display it as complementary sub-title
+  const displaySubtitle = (titleTh && titleTh !== wpTitle) ? titleTh : (service.service_meta?.subtitle || '');
+
+  return {
+    id: service.slug,
+    tag: service.service_meta?.tag || 'OFFRIEND SERVICE',
+    title: displayTitle,
+    subtitle: displaySubtitle,
+    excerpt: service.service_meta?.subtitle || service.excerpt?.rendered?.replace(/<[^>]*>?/gm, '').trim() || '',
+    image: service.featured_image_url || defaultImages[service.slug] || '/images/solutions/web-development.jpg',
+    imageAlt: displayTitle,
+    contentHtml: service.content?.rendered || '',
+    desc: service.content?.rendered?.replace(/<[^>]*>?/gm, '').trim() || '',
+    details: service.service_meta?.highlights && service.service_meta.highlights.length > 0
+      ? service.service_meta.highlights
+      : [
+          'ระบบมาตรฐานระดับองค์กร มีเสถียรภาพและปลอดภัยสูง',
+          'ออกแบบสถาปัตยกรรมระบบให้รองรับการเติบโตของธุรกิจ',
+          'ทีมงานผู้เชี่ยวชาญพร้อมดูแลและให้คำปรึกษาตลอดการใช้งาน',
+        ],
+    techStack: service.service_meta?.tech_stack && service.service_meta.tech_stack.length > 0
+      ? service.service_meta.tech_stack
+      : ['Next.js', 'TypeScript', 'Astro', 'Node.js', 'WordPress'],
+    icon: defaultIcons[idx % defaultIcons.length],
+    reversed: idx % 2 === 1,
+  };
+});
+
+
+const workSteps = [
+  {
+    step: '01',
+    title: 'วิเคราะห์โจทย์และความต้องการ',
+    desc: 'ร่วมพูดคุยกับทีมงานของท่านเพื่อทำความเข้าใจเป้าหมายทางธุรกิจ ปัญหาที่ต้องการแก้ไข และกำหนดขอบเขตระบบที่ชัดเจน',
+  },
+  {
+    step: '02',
+    title: 'ออกแบบสถาปัตยกรรม & UX/UI',
+    desc: 'สร้าง Wireframe ออกแบบหน้าจอการใช้งานที่เข้าใจง่าย พร้อมวาง System Architecture และ Database Schema เพื่อรองรับอนาคต',
+  },
+  {
+    step: '03',
+    title: 'พัฒนาและทดสอบอย่างเข้มงวด',
+    desc: 'ลงมือพัฒนาด้วยมาตรฐาน Clean Code มีการทดสอบความปลอดภัย ประสิทธิภาพ และการทำงานร่วมกับผู้ใช้ (UAT) ก่อนส่งมอบ',
+  },
+  {
+    step: '04',
+    title: 'ติดตั้งขึ้นระบบและดูแลต่อเนื่อง',
+    desc: 'Deploy ระบบขึ้น Production พร้อมฝึกอบรมการใช้งาน มีทีมงานคอยมอนิเตอร์และดูแลอัปเดตระบบให้เสถียรตลอด 24 ชั่วโมง',
+  },
+];
+---
+
+<BaseLayout
+  title="บริการของเรา — บริการพัฒนาเว็บแอปพลิเคชันและดิจิทัลโซลูชันครบวงจร"
+  description="บริการพัฒนา Web Application, สถาปัตยกรรมเว็บไซต์ Headless WordPress + Astro และบริการที่ปรึกษาด้านเทคโนโลยีและดิจิทัลโซลูชัน"
+>
+  <!-- Hero Section -->
+  <PageHeader
+    breadcrumbs={[
+      { label: 'หน้าแรก', href: '/' },
+      { label: 'บริการของเรา' },
+    ]}
+    kicker="OUR SERVICES & CAPABILITIES"
+    title="บริการพัฒนาเทคโนโลยีและ"
+    titleGradient="ดิจิทัลโซลูชันครบวงจร"
+    description="เราผสานความเชี่ยวชาญด้านวิศวกรรมซอฟต์แวร์ระดับสากล เข้ากับการเข้าใจโจทย์ธุรกิจของลูกค้าอย่างลึกซึ้ง เพื่อส่งมอบผลงานที่สร้างมูลค่าและตอบโจทย์ความสำเร็จที่แท้จริง"
+  />
+
+  <!-- Detailed Services Showcase with Real Images -->
+  <section class="py-16 sm:py-20 lg:py-24 bg-slate-50/60 dark:bg-[#070b14] transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20 lg:space-y-28">
+      {
+        servicesList.map((service) => (
+          <div
+            id={service.id}
+            class="scroll-mt-28"
+          >
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center">
+              
+              <!-- Image Column (50% on desktop, larger height matching content) -->
+              <div class={`w-full ${service.reversed ? 'lg:order-2' : 'lg:order-1'}`}>
+                <div class="relative group rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/90 dark:border-white/10 shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-[#0c1222]">
+                  <div class="aspect-[4/3] sm:aspect-[16/11] lg:aspect-auto lg:h-[480px] xl:h-[520px] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                    <img
+                      src={service.image}
+                      alt={service.imageAlt}
+                      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent pointer-events-none opacity-60 group-hover:opacity-40 transition-opacity"></div>
+                  
+                  <!-- Tag Floating on Image -->
+                  <div class="absolute top-4 left-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/90 dark:bg-[#0c1222]/90 text-slate-800 dark:text-white backdrop-blur-md shadow-xs border border-white/20">
+                      <service.icon className="w-3.5 h-3.5 text-[#162d59] dark:text-[#38bdf8]" />
+                      <span>{service.tag}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Content Column (50% on desktop, balanced height) -->
+              <div class={`w-full space-y-5 ${service.reversed ? 'lg:order-1' : 'lg:order-2'}`}>
+                <div class="space-y-1.5">
+                  <span class="text-xs font-extrabold uppercase tracking-wider text-[#162d59] dark:text-[#38bdf8]">
+                    {service.tag}
+                  </span>
+                  <h2
+                    class="text-2xl sm:text-3xl lg:text-3xl xl:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight"
+                    set:html={service.title}
+                  />
+                  {service.subtitle && service.subtitle !== service.title && (
+                    <p
+                      class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400"
+                      set:html={service.subtitle}
+                    />
+                  )}
+                </div>
+
+                <div
+                  class="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed font-normal space-y-2 [&>p]:mb-2"
+                  set:html={service.contentHtml || `<p>${service.desc}</p>`}
+                />
+
+                <!-- Detailed Scope Points (2-Column Grid to balance vertical height) -->
+                <div class="space-y-2.5 pt-1">
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                    ขอบเขตงานและจุดเด่นของบริการ
+                  </h3>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {service.details.map((detail) => (
+                      <div class="flex items-start gap-2 p-2.5 rounded-xl bg-white dark:bg-[#0c1222] border border-slate-200/80 dark:border-white/5 text-xs text-slate-700 dark:text-slate-200 shadow-2xs">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                        <span class="leading-snug">{detail}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <!-- Tech Stack Pills -->
+                <div class="pt-1">
+                  <span class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    เทคโนโลยีที่ใช้ในบริการนี้:
+                  </span>
+                  <div class="flex flex-wrap gap-1.5">
+                    {service.techStack.map((tech) => (
+                      <span class="px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <!-- CTA Action Link -->
+                <div class="pt-2 flex flex-wrap items-center gap-3">
+                  <a
+                    href="/contact"
+                    class="btn-brand-primary text-xs sm:text-sm py-2.5 px-5 inline-flex items-center gap-2"
+                  >
+                    <span>ปรึกษาหรือขอใบเสนอราคา</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                  <a
+                    href="/projects"
+                    class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#060c2e] dark:hover:text-[#38bdf8] transition-colors"
+                  >
+                    <span>ดูผลงานที่เกี่ยวข้อง</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 opacity-70" />
+                  </a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Work Process Section (4 Steps) -->
+  <section class="py-16 sm:py-20 border-t border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#070b14] transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-14">
+        <span class="text-xs font-extrabold uppercase tracking-wider text-[#162d59] dark:text-[#38bdf8] block mb-2">
+          HOW WE WORK
+        </span>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+          กระบวนการทำงานที่เป็นระบบและโปร่งใส
+        </h2>
+        <p class="text-slate-600 dark:text-slate-400 text-sm mt-3">
+          เรายึดมั่นการทำงานที่มีมาตรฐาน ส่งมอบงานตรงเวลา และให้ลูกค้ามีส่วนร่วมตรวจสอบในทุกขั้นตอน
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {
+          workSteps.map((step) => (
+            <div class="p-6 rounded-2xl bg-slate-50/80 dark:bg-[#0c1222] border border-slate-200/80 dark:border-white/10 relative group hover:border-[#162d59]/40 transition-all">
+              <span class="text-3xl sm:text-4xl font-black text-[#162d59]/25 dark:text-[#38bdf8]/20 font-mono block mb-3">
+                {step.step}
+              </span>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-2">
+                {step.title}
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
+                {step.desc}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- Bottom CTA Section -->
+  <section class="py-16 sm:py-20 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-[#070b14] transition-colors">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white mb-4">
+        พร้อมเริ่มโปรเจกต์ดิจิทัลกับทีมงานของเราแล้วหรือยัง?
+      </h2>
+      <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base mb-8 max-w-xl mx-auto font-normal leading-relaxed">
+        ส่งข้อกำหนดโปรเจกต์ของคุณมาให้เราประเมิน หรือนัดหมายเพื่อพูดคุยและปรึกษากับทีมวิศวกรซอฟต์แวร์ของเราได้ฟรี ไม่มีค่าใช้จ่ายเบื้องต้น
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="/contact" class="btn-brand-primary text-base py-3 px-8 inline-flex items-center gap-2">
+          <span>ติดต่อเพื่อขอคำปรึกษาและใบเสนอราคา</span>
+          <ArrowRight className="w-4 h-4" />
+        </a>
+        <a
+          href={`tel:${siteSettings.phone.replace(/[^0-9]/g, '')}`}
+          class="inline-flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-[#060c2e] dark:hover:text-[#38bdf8] px-5 py-3 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5"
+        >
+          <Smartphone className="w-4 h-4 text-[#162d59]" />
+          <span>โทรด่วน: {siteSettings.phone}</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+

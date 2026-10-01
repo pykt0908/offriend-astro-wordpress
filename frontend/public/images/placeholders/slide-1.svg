@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 800" width="1920" height="800">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a192f"/>
+      <stop offset="50%" stop-color="#0f274a"/>
+      <stop offset="100%" stop-color="#050d1a"/>
+    </linearGradient>
+    <linearGradient id="accent1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <pattern id="grid1" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(255, 255, 255, 0.05)" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="glow1" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="800" fill="url(#bg1)"/>
+  <rect width="1920" height="800" fill="url(#grid1)"/>
+  <circle cx="960" cy="400" r="550" fill="url(#glow1)"/>
+
+  <!-- Subtle Decorative Shapes -->
+  <circle cx="300" cy="180" r="160" fill="none" stroke="rgba(56, 189, 248, 0.15)" stroke-width="2" stroke-dasharray="8 6"/>
+  <circle cx="1650" cy="600" r="220" fill="none" stroke="rgba(56, 189, 248, 0.1)" stroke-width="2" stroke-dasharray="12 8"/>
+  <rect x="1500" y="120" width="110" height="110" rx="18" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2"/>
+
+  <!-- Center Card / Badge -->
+  <g transform="translate(960, 380)">
+    <!-- Dimension Pill -->
+    <rect x="-190" y="-170" width="380" height="48" rx="24" fill="rgba(2, 132, 199, 0.2)" stroke="#0284c7" stroke-width="2"/>
+    <circle cx="-150" cy="-146" r="5" fill="#38bdf8"/>
+    <text x="-130" y="-140" font-family="system-ui, -apple-system, sans-serif" font-size="19" font-weight="700" fill="#38bdf8" letter-spacing="2">
+      BANNER PLACEHOLDER
+    </text>
+
+    <!-- Main Dimension Text -->
+    <text x="0" y="-30" font-family="system-ui, -apple-system, sans-serif" font-size="94" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="2">
+      1920 × 800
+    </text>
+
+    <!-- Subtitle -->
+    <text x="0" y="45" font-family="system-ui, -apple-system, sans-serif" font-size="30" font-weight="600" fill="#94a3b8" text-anchor="middle">
+      Slide 01 — Cloud Architecture &amp; High-Performance Systems
+    </text>
+
+    <text x="0" y="95" font-family="system-ui, -apple-system, sans-serif" font-size="19" font-weight="400" fill="#64748b" text-anchor="middle">
+      อัตราส่วน 2.4:1 (Standard Full HD Wide Banner 1920 × 800)
+    </text>
+
+    <!-- Aspect Ratio Guide Box -->
+    <rect x="-350" y="135" width="700" height="4" rx="2" fill="url(#accent1)" opacity="0.6"/>
+  </g>
+</svg>

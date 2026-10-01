@@ -1,0 +1,89 @@
+---
+export interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  kicker: string;
+  title: string;
+  titleGradient?: string;
+  description?: string;
+  breadcrumbs?: BreadcrumbItem[];
+  maxWidth?: string;
+}
+
+const {
+  kicker,
+  title,
+  titleGradient,
+  description,
+  breadcrumbs = [],
+  maxWidth = 'max-w-7xl',
+} = Astro.props;
+---
+
+<!-- PAGE HERO HEADER: Offriend Brand Navy / Blue with Topo Waves & Glow Accents -->
+<section class="relative bg-gradient-to-r from-[#060b18] via-[#0a162b] to-[#060b18] text-white py-12 sm:py-16 overflow-hidden border-b border-[#162d59]/40">
+  <!-- Topographic contour wave lines background decoration -->
+  <div class="absolute inset-0 opacity-15 pointer-events-none mix-blend-overlay text-[#3b82f6]">
+    <svg class="w-full h-full object-cover" viewBox="0 0 1440 320" preserveAspectRatio="none" fill="none" stroke="currentColor">
+      <path d="M0,64L48,80C96,96,192,128,288,149.3C384,171,480,181,576,165.3C672,149,768,107,864,112C960,117,1056,171,1152,181.3C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" stroke-width="1.5"></path>
+      <path d="M0,160L48,176C96,192,192,224,288,218.7C384,213,480,171,576,149.3C672,128,768,128,864,149.3C960,171,1056,213,1152,208C1248,203,1344,149,1392,122.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" stroke-width="1"></path>
+    </svg>
+  </div>
+
+  <!-- Soft glow orbs -->
+  <div class="absolute -top-24 -left-24 w-96 h-96 bg-[#162d59]/25 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute top-1/2 right-0 w-80 h-80 bg-[#1e3a8a]/20 rounded-full blur-3xl pointer-events-none"></div>
+
+  <div class={`${maxWidth} mx-auto px-4 sm:px-6 lg:px-8 relative z-10`}>
+    <!-- Breadcrumb -->
+    {breadcrumbs.length > 0 && (
+      <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-[#93c5fd]/80 mb-4 font-content">
+        {breadcrumbs.map((crumb, idx) => (
+          <>
+            {idx > 0 && <span class="text-[#93c5fd]/40">/</span>}
+            {crumb.href ? (
+              <a href={crumb.href} data-astro-prefetch="hover" class="hover:text-white transition-colors">
+                {crumb.label}
+              </a>
+            ) : (
+              <span class="text-white font-medium">{crumb.label}</span>
+            )}
+          </>
+        ))}
+      </nav>
+    )}
+
+    <!-- Title & Kicker -->
+    {kicker && (
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-6 h-1 bg-[#2563eb] rounded-full inline-block"></span>
+        <span class="text-xs sm:text-sm font-bold tracking-wider uppercase text-[#60a5fa]">
+          {kicker}
+        </span>
+      </div>
+    )}
+
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight font-display mb-3">
+      {title}
+      {titleGradient && (
+        <>
+          {' '}
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#60a5fa] via-sky-300 to-[#38bdf8]">
+            {titleGradient}
+          </span>
+        </>
+      )}
+    </h1>
+
+    {description && (
+      <p class="text-sm sm:text-base md:text-lg text-slate-300 max-w-3xl font-content leading-relaxed">
+        {description}
+      </p>
+    )}
+
+    <slot />
+  </div>
+</section>

@@ -1,0 +1,809 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getToolBySlug, getTools, getSiteSettings } from "../../lib/wordpress";
+import type { WPTool } from "../../types/wordpress";
+import ToolCard from "../../components/ToolCard.astro";
+import {
+  Download,
+  ChevronRight,
+  Sparkles,
+  ArrowUpRight,
+  Phone,
+  Smartphone,
+  Mail,
+  MessageSquare,
+  Eye,
+} from "lucide-react";
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const [tool, siteSettings] = await Promise.all([
+  slug ? getToolBySlug(slug) : null,
+  getSiteSettings(),
+]);
+
+if (!tool) {
+  return new Response(null, { status: 404, statusText: "Tool Not Found" });
+}
+
+// Fetch other recommended tools
+const allTools = await getTools({ perPage: 6 });
+const otherTools = allTools.filter((t) => t.slug !== tool.slug).slice(0, 3);
+
+// Image
+const featuredImage =
+  tool.featured_image_url ||
+  tool._embedded?.["wp:featuredmedia"]?.[0]?.source_url ||
+  "/images/tools/budget-calculator.jpg";
+
+// Meta
+const format = tool.tool_meta?.format || "Excel & Google Sheets";
+const version = tool.tool_meta?.version || "2026 Edition";
+const badge = tool.tool_meta?.badge || "แนะนำ 2026";
+const downloads = tool.tool_meta?.downloads || "2.4k+ ดาวน์โหลด";
+const fileSize = tool.tool_meta?.file_size || "1.8 MB";
+const downloadLink = tool.tool_meta?.download_url || tool.tool_meta?.download_link || "#";
+const manualLink = tool.tool_meta?.manual_url || tool.tool_meta?.manual_link || tool.tool_meta?.guide_url || "";
+const customFaqs = tool.tool_meta?.faqs && tool.tool_meta.faqs.length > 0 ? tool.tool_meta.faqs : null;
+
+const cleanDescription = (tool.excerpt?.rendered || "")
+  .replace(/<[^>]+>/g, "")
+  .trim();
+
+// Format Thai Date
+const formattedDate = new Date(tool.date || Date.now()).toLocaleDateString(
+  "th-TH",
+  {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  },
+);
+
+// =========================================================================
+// 1. DYNAMICALLY EXTRACT HEADINGS FROM WORDPRESS TEXT CONTENT
+// =========================================================================
+const rawContent = tool.content?.rendered || tool.excerpt?.rendered || "";
+
+interface TocItem {
+  id: string;
+  text: string;
+  level: number;
+}
+
+const extractedHeadings: TocItem[] = [];
+let headingCounter = 0;
+
+// Replace each h2, h3, h4 tag to attach an id and scroll-margin, and collect text for TOC
+const processedContent = rawContent.replace(
+  /<h([2-4])([^>]*)>(.*?)<\/h\1>/gi,
+  (match, levelStr, attrs, innerHtml) => {
+    headingCounter++;
+    const text = innerHtml.replace(/<[^>]+>/g, "").trim();
+    if (!text) return match;
+
+    // Check if an id is already in the tag attributes (e.g. from Gutenberg)
+    const idMatch = attrs.match(/id=["']([^"']+)["']/i);
+    const id = idMatch ? idMatch[1] : `topic-${headingCounter}`;
+
+    extractedHeadings.push({
+      id,
+      text,
+      level: parseInt(levelStr, 10),
+    });
+
+    // Remove existing id to avoid duplicate and inject id + scroll-margin-top
+    const cleanAttrs = attrs.replace(/\s*id=["'][^"']*["']/i, "");
+    return `<h${levelStr} id="${id}" class="scroll-mt-28" ${cleanAttrs}>${innerHtml}</h${levelStr}>`;
+  },
+);
+
+// Build complete dynamic TOC list:
+// 1. Overview
+// 2. All Headings extracted from WordPress
+// 3. FAQ section
+// 4. Related tools section
+const tocList: TocItem[] = [
+  { id: "overview", text: "ภาพรวมเครื่องมือ", level: 2 },
+  ...extractedHeadings,
+  { id: "faq", text: "คำถามที่พบบ่อย", level: 2 },
+];
+
+if (otherTools.length > 0) {
+  tocList.push({ id: "related", text: "เครื่องมือที่เกี่ยวข้อง", level: 2 });
+}
+
+const pageTitle = `${tool.title.rendered.replace(/<[^>]+>/g, "")} — เครื่องมือและเทมเพลต | Offriend`;
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={cleanDescription}
+  image={featuredImage}
+>
+  <div class="py-8 sm:py-12 bg-white dark:bg-[#070b14] transition-colors">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- 1. BREADCRUMB & BACK NAVIGATION -->
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <nav
+          aria-label="Breadcrumb"
+          class="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-content"
+        >
+          <a
+            href="/"
+            data-astro-prefetch="hover"
+            class="hover:text-[#060c2e] dark:hover:text-[#38bdf8] transition-colors"
+            >หน้าแรก</a
+          >
+          <span>/</span>
+          <a
+            href="/tools"
+            data-astro-prefetch="hover"
+            class="hover:text-[#060c2e] dark:hover:text-[#38bdf8] transition-colors"
+            >เครื่องมือ &amp; เทมเพลต</a
+          >
+          <span>/</span>
+          <span class="text-slate-600 dark:text-slate-400">{format}</span>
+          <span>/</span>
+          <span class="text-slate-900 dark:text-white font-semibold"
+            >รายละเอียด</span
+          >
+        </nav>
+
+        <button
+          type="button"
+          onclick="window.history.length > 1 ? window.history.back() : window.location.href = '/tools'"
+          class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-600 hover:text-[#060c2e] dark:text-slate-300 dark:hover:text-[#38bdf8] transition-colors cursor-pointer group/back"
+          aria-label="ย้อนกลับไปหน้าที่แล้ว"
+        >
+          <span
+            class="text-base transition-transform group-hover/back:-translate-x-1"
+            >←</span
+          >
+          <span>ย้อนกลับ</span>
+        </button>
+      </div>
+
+      <!-- 2. HERO SPLIT: 16:9 IMAGE (LEFT) + TITLE & DESCRIPTION (RIGHT) -->
+      <div
+        class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center mb-8 sm:mb-10"
+      >
+        <!-- Left Column: 16:9 Featured Image (~5 cols) -->
+        <div class="lg:col-span-5">
+          <div
+            class="relative w-full aspect-video rounded-xl overflow-hidden shadow-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-900"
+          >
+            <img
+              src={featuredImage}
+              alt={tool.title.rendered}
+              transition:name={`tool-image-${tool.slug}`}
+              class="w-full h-full object-cover rounded-xl"
+              loading="eager"
+              decoding="async"
+            />
+            {
+              badge && (
+                <div class="absolute top-3 left-3">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold bg-white/95 dark:bg-[#070b14]/90 backdrop-blur-md text-[#0a192f] dark:text-[#93c5fd] border border-slate-200/80 dark:border-white/10 shadow-xs">
+                    <Sparkles className="w-3.5 h-3.5 text-[#162d59]" />
+                    {badge}
+                  </span>
+                </div>
+              )
+            }
+          </div>
+        </div>
+
+        <!-- Right Column: Kicker, Title, Excerpt, Updated Date (~7 cols) -->
+        <div class="lg:col-span-7 flex flex-col justify-center">
+          <!-- Kicker Tag with Red Dash -->
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-5 h-0.5 bg-red-500 rounded-full inline-block"></span>
+            <span
+              class="text-xs sm:text-sm font-bold tracking-wide text-red-500 font-display"
+            >
+              {format} · OF-TOOL-{tool.id}
+            </span>
+          </div>
+
+          <!-- Main Bold Heading -->
+          <h1
+            class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-extrabold text-slate-900 dark:text-white leading-[1.25] font-display mb-4"
+          >
+            {tool.title.rendered}
+          </h1>
+
+          <!-- Detailed Excerpt -->
+          <p
+            class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-content mb-6"
+          >
+            {cleanDescription}
+          </p>
+
+          <!-- Update Date -->
+          <div
+            class="text-xs sm:text-sm text-slate-400 dark:text-slate-500 font-content"
+          >
+            อัปเดตล่าสุด {formattedDate}
+          </div>
+        </div>
+      </div>
+
+      <!-- Horizontal Divider -->
+      <hr
+        class="border-t border-slate-200 dark:border-white/10 my-8 sm:my-10"
+      />
+
+      <!-- 3. ACTION & IN-HOUSE PROMO ROW (Matching screenshot 1 bottom row) -->
+      <div
+        class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch mb-12 sm:mb-16"
+      >
+        <!-- Left Action Box: Pricing, Free Badge, Buttons, PDF link (~6-7 cols) -->
+        <div
+          class="lg:col-span-6 flex flex-col justify-between p-6 sm:p-8 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]"
+        >
+          <div>
+            <span
+              class="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1"
+            >
+              สิทธิ์และราคา
+            </span>
+            <div class="flex flex-wrap items-baseline gap-2.5 mb-1.5">
+              <span
+                class="text-3xl sm:text-4xl font-extrabold text-[#162d59] dark:text-[#38bdf8] font-display"
+              >
+                ฟรี 100%
+              </span>
+              <span
+                class="text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+              >
+                ห้ามทำซ้ำหรือขายต่อ
+              </span>
+            </div>
+            <p
+              class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-6 font-content"
+            >
+              ใช้งานได้ทั้งส่วนตัวและในองค์กรธุรกิจ ·
+              ปรับแต่งสูตรและโลโก้ได้อิสระ
+            </p>
+
+            <!-- Buttons: Primary Download (Dark Orange-Red) + Secondary (Bordered) -->
+            <div class="flex flex-wrap items-center gap-3 mb-5">
+              <a
+                href={downloadLink}
+                download
+                class="inline-flex items-center gap-2 bg-[#d94826] hover:bg-[#c23e1e] text-white font-bold text-sm px-6 py-3 rounded-lg shadow-md shadow-[#d94826]/20 transition-all transform hover:-translate-y-0.5 cursor-pointer font-display"
+              >
+                <Download className="w-4 h-4" />
+                <span>ดาวน์โหลดเทมเพลตฟรี</span>
+              </a>
+
+              <a
+                href="#overview"
+                class="inline-flex items-center gap-2 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-[#0a192f] dark:text-[#38bdf8] border border-[#060c2e]/40 dark:border-indigo-300/40 font-bold text-sm px-5 py-3 rounded-lg shadow-xs transition-colors font-display"
+              >
+                <Eye className="w-4 h-4 text-[#060c2e] dark:text-[#38bdf8]" />
+                <span>ดูรายละเอียดเนื้อหา</span>
+              </a>
+            </div>
+
+            <!-- PDF Documentation / Manual Guide Link -->
+            {
+              manualLink ? (
+                <a
+                  href={manualLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#162d59] dark:hover:text-[#38bdf8] transition-colors group"
+                >
+                  <span class="px-1.5 py-0.5 text-[10px] font-black bg-[#162d59] text-white rounded">
+                    คู่มือ
+                  </span>
+                  <span>เปิด / ดาวน์โหลดคู่มือการใช้งาน (Manual Guide)</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </a>
+              ) : (
+                <a
+                  href="#overview"
+                  class="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-[#060c2e] dark:hover:text-[#38bdf8] transition-colors group"
+                >
+                  <span class="px-1.5 py-0.5 text-[10px] font-black bg-[#d94826] text-white rounded">
+                    PDF
+                  </span>
+                  <span>ดาวน์โหลดคู่มือการใช้งานและคำอธิบายสูตร (Documentation Guide)</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </a>
+              )
+            }
+          </div>
+
+          <!-- Spec Footer -->
+          <div
+            class="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400 pt-6 mt-6 border-t border-slate-200/80 dark:border-white/5"
+          >
+            <span
+              >ขนาดไฟล์: <strong class="text-slate-700 dark:text-slate-300"
+                >{fileSize}</strong
+              ></span
+            >
+            <span>•</span>
+            <span
+              >เวอร์ชัน: <strong class="text-slate-700 dark:text-slate-300"
+                >{version}</strong
+              ></span
+            >
+            <span>•</span>
+            <span
+              >สถิติ: <strong class="text-slate-700 dark:text-slate-300"
+                >{downloads}</strong
+              ></span
+            >
+          </div>
+        </div>
+
+        <!-- Right Promo Banner: In-House & Custom Development (Matching screenshot 1 right banner) -->
+        <div
+          class="lg:col-span-6 rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 bg-gradient-to-br from-slate-900 via-[#0e172a] to-[#0a192f] text-white flex flex-col justify-between shadow-xl relative"
+        >
+          <!-- Background decoration -->
+          <div
+            class="absolute -right-10 -bottom-10 w-60 h-60 bg-[#162d59]/20 rounded-full blur-3xl pointer-events-none"
+          >
+          </div>
+
+          <!-- Banner Content -->
+          <div class="p-6 sm:p-7 relative z-10">
+            <!-- Header Badges -->
+            <div class="flex items-center justify-between gap-3 mb-3">
+              <div class="flex items-center gap-2.5">
+                <img
+                  src="/images/logos/no-bg/1.5TP.png"
+                  alt="Offriend Logo"
+                  class="h-7 sm:h-8 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.4)]"
+                  loading="lazy"
+                />
+                <span
+                  class="text-xs sm:text-sm font-bold text-[#93c5fd] tracking-wide uppercase font-display"
+                  >Offriend Software &amp; Data</span
+                >
+              </div>
+              <span
+                class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/15 backdrop-blur-md text-white border border-white/20"
+              >
+                โซลูชันสำหรับองค์กร
+              </span>
+            </div>
+
+            <!-- Big Title -->
+            <h3
+              class="text-xl sm:text-2xl font-extrabold text-white leading-snug mb-2 font-display"
+            >
+              พัฒนาระบบเฉพาะทางให้ทีมของคุณ
+            </h3>
+            <p
+              class="text-xs sm:text-sm text-blue-100 font-content mb-5 leading-relaxed"
+            >
+              ต้องการต่อยอดเทมเพลตนี้เป็น Web Application ระบบคำนวณอัตโนมัติ
+              หรือเชื่อมต่อฐานข้อมูล SQL/ERP ติดต่อทีมวิศวกรของเราได้ทันที
+            </p>
+
+            <!-- 3 Highlights -->
+            <div
+              class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs text-slate-200 mb-2"
+            >
+              <div
+                class="flex items-center gap-1.5 bg-white/10 backdrop-blur-xs px-3 py-2 rounded-lg border border-white/10"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-300"></span>
+                <span>ปรับแต่งสูตรตามสั่ง</span>
+              </div>
+              <div
+                class="flex items-center gap-1.5 bg-white/10 backdrop-blur-xs px-3 py-2 rounded-lg border border-white/10"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-300"></span>
+                <span>เชื่อมต่อ Database</span>
+              </div>
+              <div
+                class="flex items-center gap-1.5 bg-white/10 backdrop-blur-xs px-3 py-2 rounded-lg border border-white/10"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-300"></span>
+                <span>ทีมงานคอยซัพพอร์ต</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Contact Strip (Dark Teal/Navy Bar matching screenshot 1) -->
+          <div
+            class="bg-[#071326] px-6 py-3.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs relative z-10"
+          >
+            <div class="flex flex-wrap items-center gap-4 text-slate-300">
+              <a
+                href={`tel:${siteSettings.phone.replace(/[^0-9]/g, "")}`}
+                class="flex items-center gap-1.5 hover:text-white transition-colors"
+              >
+                <Smartphone className="w-3.5 h-3.5 text-[#38bdf8]" />
+                <span>ติดต่อสอบถาม: <strong>{siteSettings.phone}</strong></span>
+              </a>
+              <span class="opacity-30 hidden sm:inline">|</span>
+              <a
+                href={siteSettings.line_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-1.5 hover:text-white transition-colors"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                <span>LINE: <strong>{siteSettings.line_id}</strong></span>
+              </a>
+              <span class="opacity-30 hidden sm:inline">|</span>
+              <a
+                href={`mailto:${siteSettings.contact_email}`}
+                class="flex items-center gap-1.5 hover:text-white transition-colors"
+              >
+                <Mail className="w-3.5 h-3.5 text-[#38bdf8]" />
+                <span>{siteSettings.contact_email}</span>
+              </a>
+            </div>
+
+            <a
+              href="/contact"
+              class="inline-flex items-center gap-1 text-xs font-bold text-[#93c5fd] hover:text-white transition-colors"
+            >
+              <span>ขอใบเสนอราคา</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. MAIN CONTENT AREA: TABLE OF CONTENTS (LEFT) + DYNAMIC WORDPRESS CONTENT (RIGHT) (Matching screenshot 2) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        <!-- Left: Table of Contents (TOC) (Col 3, Sticky matching screenshot 2) -->
+        <aside class="lg:col-span-3 lg:sticky lg:top-24">
+          <div
+            class="bg-white dark:bg-[#0c1222] p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-white/10 shadow-xs"
+          >
+            <!-- TOC Header -->
+            <div
+              class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-4 font-display"
+            >
+              หัวข้อในหน้านี้
+            </div>
+
+            <!-- Dynamic Vertical Links Extracted from WordPress Headings (Matching screenshot 2) -->
+            <nav
+              id="toc-nav"
+              class="border-l-2 border-slate-200 dark:border-white/10 space-y-1 font-content"
+            >
+              {
+                tocList.map((item, index) => (
+                  <a
+                    href={`#${item.id}`}
+                    class:list={[
+                      "toc-link block py-1.5 text-sm transition-colors",
+                      index === 0
+                        ? "font-semibold text-[#060c2e] dark:text-[#38bdf8] border-l-2 border-[#060c2e] -ml-[2px] pl-3.5"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-l-2 border-transparent -ml-[2px] pl-3.5",
+                      item.level === 3 ? "pl-6 text-[13px] opacity-90" : "",
+                      item.level === 4 ? "pl-8 text-xs opacity-80" : "",
+                    ]}
+                  >
+                    {item.text}
+                  </a>
+                ))
+              }
+            </nav>
+
+            <!-- Quick Download CTA inside TOC -->
+            <div
+              class="mt-6 pt-5 border-t border-slate-100 dark:border-white/5"
+            >
+              <a
+                href={downloadLink}
+                download
+                class="w-full inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-xs px-4 py-2.5 rounded-lg shadow-xs transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>ดาวน์โหลดไฟล์ทันที</span>
+              </a>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Right: Dynamic Content from WordPress + FAQ (Col 9) -->
+        <main class="lg:col-span-9 space-y-12">
+          <!-- Dynamic WordPress Content Area (#overview and anchor headings) -->
+          <article
+            id="overview"
+            class="scroll-mt-28 bg-white dark:bg-[#0c1222] p-6 sm:p-8 lg:p-10 rounded-xl border border-slate-200 dark:border-white/10 shadow-xs"
+          >
+            <div
+              class="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 font-content leading-relaxed space-y-4"
+              set:html={processedContent}
+            />
+          </article>
+
+          <!-- SECTION: คำถามที่พบบ่อย (#faq - Matching screenshot 3) -->
+          <section id="faq" class="scroll-mt-28 pt-4">
+            <h2
+              class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mb-6 font-display flex items-center gap-2.5"
+            >
+              คำถามที่พบบ่อย
+            </h2>
+
+            <!-- Accordion List (Matching screenshot 3) -->
+            <div class="space-y-3 font-content">
+              {
+                customFaqs && customFaqs.length > 0 ? (
+                  customFaqs.map((faq, idx) => (
+                    <details
+                      open={idx === 0}
+                      class="group rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1222] p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 dark:hover:border-white/20"
+                    >
+                      <summary class="flex items-center gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden font-bold text-sm sm:text-base text-slate-800 dark:text-slate-200">
+                        <ChevronRight className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8] shrink-0 stroke-[2.5] transition-transform duration-200 group-open:rotate-90" />
+                        <span>{faq.question}</span>
+                      </summary>
+                      <div class="mt-3.5 pt-3.5 border-t border-slate-100 dark:border-white/5 pl-7 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line">
+                        {faq.answer}
+                      </div>
+                    </details>
+                  ))
+                ) : (
+                  <>
+                    <!-- FAQ Item 1 -->
+                    <details
+                      class="group rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1222] p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 dark:hover:border-white/20"
+                    >
+                      <summary
+                        class="flex items-center gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden font-bold text-sm sm:text-base text-slate-800 dark:text-slate-200"
+                      >
+                        <ChevronRight
+                          className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8] shrink-0 stroke-[2.5] transition-transform duration-200 group-open:rotate-90"
+                        />
+                        <span
+                          >เทมเพลตนี้รองรับ Microsoft Excel เวอร์ชันใดบ้าง และใช้กับ
+                          Google Sheets ได้หรือไม่</span
+                        >
+                      </summary>
+                      <div
+                        class="mt-3.5 pt-3.5 border-t border-slate-100 dark:border-white/5 pl-7 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed"
+                      >
+                        เทมเพลตรองรับ Microsoft Excel 2016, 2019, 2021, Office 365
+                        ทั้งบน Windows และ macOS รวมถึงสามารถอัปโหลดเข้า Google Drive
+                        เพื่อเปิดใช้งานบน Google Sheets ได้ 100%
+                        โดยสูตรและโครงสร้างตารางไม่คลาดเคลื่อน
+                      </div>
+                    </details>
+
+                    <!-- FAQ Item 2 -->
+                    <details
+                      class="group rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1222] p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 dark:hover:border-white/20"
+                    >
+                      <summary
+                        class="flex items-center gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden font-bold text-sm sm:text-base text-slate-800 dark:text-slate-200"
+                      >
+                        <ChevronRight
+                          className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8] shrink-0 stroke-[2.5] transition-transform duration-200 group-open:rotate-90"
+                        />
+                        <span
+                          >สามารถนำไปปรับแต่งสูตร เพิ่มแถว/คอลัมน์
+                          หรือใส่โลโก้บริษัทของตัวเองได้หรือไม่</span
+                        >
+                      </summary>
+                      <div
+                        class="mt-3.5 pt-3.5 border-t border-slate-100 dark:border-white/5 pl-7 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed"
+                      >
+                        ได้แน่นอนครับ ไฟล์ไม่มีการล็อกรหัสผ่าน (No Password Protected)
+                        คุณสามารถเพิ่มคอลัมน์ แก้ไขสี ฟอนต์ ใส่โลโก้องค์กร
+                        และปรับเงื่อนไขสูตรคำนวณให้เข้ากับระเบียบปฏิบัติงานของบริษัทคุณได้ทั้งหมด
+                      </div>
+                    </details>
+
+                    <!-- FAQ Item 3 -->
+                    <details
+                      class="group rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1222] p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 dark:hover:border-white/20"
+                    >
+                      <summary
+                        class="flex items-center gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden font-bold text-sm sm:text-base text-slate-800 dark:text-slate-200"
+                      >
+                        <ChevronRight
+                          className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8] shrink-0 stroke-[2.5] transition-transform duration-200 group-open:rotate-90"
+                        />
+                        <span
+                          >มีค่าใช้จ่ายแอบแฝง
+                          หรือเงื่อนไขลิขสิทธิ์สำหรับการใช้งานในเชิงพาณิชย์หรือไม่</span
+                        >
+                      </summary>
+                      <div
+                        class="mt-3.5 pt-3.5 border-t border-slate-100 dark:border-white/5 pl-7 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed"
+                      >
+                        ดาวน์โหลดและใช้งานฟรี 100% ภายใต้สัญญาอนุญาตเปิดกว้าง
+                        ไม่มีค่าธรรมเนียมแอบแฝง สามารถนำไปใช้ในธุรกิจ ร้านค้า
+                        หรือองค์กรของคุณได้เลย
+                        (ไม่อนุญาตให้นำไฟล์เปล่าไปจำหน่ายต่อโดยตรงเท่านั้น)
+                      </div>
+                    </details>
+
+                    <!-- FAQ Item 4 -->
+                    <details
+                      class="group rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1222] p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 dark:hover:border-white/20"
+                    >
+                      <summary
+                        class="flex items-center gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden font-bold text-sm sm:text-base text-slate-800 dark:text-slate-200"
+                      >
+                        <ChevronRight
+                          className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8] shrink-0 stroke-[2.5] transition-transform duration-200 group-open:rotate-90"
+                        />
+                        <span
+                          >ไฟล์เทมเพลตปลอดภัยหรือไม่ มีการฝัง Script หรือ Macro
+                          ที่เป็นอันตรายหรือไม่</span
+                        >
+                      </summary>
+                      <div
+                        class="mt-3.5 pt-3.5 border-t border-slate-100 dark:border-white/5 pl-7 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed"
+                      >
+                        ไฟล์ถูกออกแบบด้วยสูตรมาตรฐานของ Excel (Formula Native)
+                        ไม่มีรหัส Macro (VBA) แฝง และไม่มีสคริปต์ภายนอก
+                        ปลอดภัยจากมัลแวร์
+                        ไม่ต้องกังวลเรื่องการถูกบล็อกจากนโยบายไอทีขององค์กร
+                      </div>
+                    </details>
+
+                    <!-- FAQ Item 5 -->
+                    <details
+                      class="group rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1222] p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 dark:hover:border-white/20"
+                    >
+                      <summary
+                        class="flex items-center gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden font-bold text-sm sm:text-base text-slate-800 dark:text-slate-200"
+                      >
+                        <ChevronRight
+                          className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8] shrink-0 stroke-[2.5] transition-transform duration-200 group-open:rotate-90"
+                        />
+                        <span
+                          >หากต้องการพัฒนาระบบนี้เป็น Web Application
+                          สำหรับใช้งานทั้งบริษัท ต้องทำอย่างไร</span
+                        >
+                      </summary>
+                      <div
+                        class="mt-3.5 pt-3.5 border-t border-slate-100 dark:border-white/5 pl-7 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed"
+                      >
+                        ทีมงานวิศวกรของ {siteSettings.company_name_th} ให้บริการพัฒนาต่อยอดเทมเพลตเป็นระบบเว็บแอปพลิเคชัน
+                        เชื่อมต่อฐานข้อมูล จัดการสิทธิ์ผู้ใช้งาน (Roles &amp; Permissions)
+                        และออกรายงาน PDF แบบ Real-time ท่านสามารถคลิกปุ่ม "ขอใบเสนอราคา"
+                        หรือติดต่อโทร {siteSettings.phone} เพื่อพูดคุยความต้องการได้ฟรี
+                      </div>
+                    </details>
+
+                    <!-- FAQ Item 6 -->
+                    <details
+                      class="group rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1222] p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 dark:hover:border-white/20"
+                    >
+                      <summary
+                        class="flex items-center gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden font-bold text-sm sm:text-base text-slate-800 dark:text-slate-200"
+                      >
+                        <ChevronRight
+                          className="w-4 h-4 text-[#162d59] dark:text-[#38bdf8] shrink-0 stroke-[2.5] transition-transform duration-200 group-open:rotate-90"
+                        />
+                        <span
+                          >ถ้าพบปัญหาในการใช้งานหรือสูตรคำนวณ
+                          สามารถติดต่อสอบถามทีมงานได้อย่างไร</span
+                        >
+                      </summary>
+                      <div
+                        class="mt-3.5 pt-3.5 border-t border-slate-100 dark:border-white/5 pl-7 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed"
+                      >
+                        สามารถติดต่อผ่าน LINE Official: {siteSettings.line_id} หรืออีเมล
+                        {siteSettings.contact_email} พร้อมระบุชื่อเทมเพลตและคำถาม ทีมงานฝ่ายสนับสนุนของเรายินดีให้คำแนะนำตลอดวันและเวลาทำการ
+                      </div>
+                    </details>
+                  </>
+                )
+              }
+            </div>
+          </section>
+
+          <!-- SECTION: เครื่องมือที่เกี่ยวข้อง (#related) -->
+          {
+            otherTools.length > 0 && (
+              <section
+                id="related"
+                class="scroll-mt-28 pt-8 border-t border-slate-200 dark:border-white/10"
+              >
+                <div class="flex items-center justify-between mb-6">
+                  <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-display">
+                    เครื่องมือที่เกี่ยวข้อง
+                  </h2>
+                  <a
+                    href="/tools"
+                    class="text-xs sm:text-sm font-bold text-[#060c2e] dark:text-[#38bdf8] hover:text-[#162d59] flex items-center gap-1 transition-colors"
+                  >
+                    ดูทั้งหมด <span>→</span>
+                  </a>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {otherTools.map((item) => (
+                    <ToolCard tool={item} />
+                  ))}
+                </div>
+              </section>
+            )
+          }
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic TOC Scrollspy Script -->
+  <script is:inline>
+    const setupTocScrollspy = () => {
+      const links = document.querySelectorAll("#toc-nav .toc-link");
+      if (links.length === 0) return;
+
+      const items = [];
+      links.forEach((link) => {
+        const href = link.getAttribute("href");
+        if (href && href.startsWith("#")) {
+          const el = document.querySelector(href);
+          if (el) {
+            items.push({ el, link });
+          }
+        }
+      });
+
+      if (items.length === 0) return;
+
+      const setActive = (activeLink) => {
+        links.forEach((l) => {
+          l.classList.remove(
+            "text-[#060c2e]",
+            "dark:text-[#38bdf8]",
+            "border-[#060c2e]",
+            "font-semibold",
+          );
+          l.classList.add(
+            "text-slate-600",
+            "dark:text-slate-400",
+            "border-transparent",
+          );
+        });
+        if (activeLink) {
+          activeLink.classList.remove(
+            "text-slate-600",
+            "dark:text-slate-400",
+            "border-transparent",
+          );
+          activeLink.classList.add(
+            "text-[#060c2e]",
+            "dark:text-[#38bdf8]",
+            "border-[#060c2e]",
+            "font-semibold",
+          );
+        }
+      };
+
+      const handleScroll = () => {
+        const scrollPosition = window.scrollY + 140;
+        let currentItem = items[0];
+
+        for (const item of items) {
+          const top = item.el.getBoundingClientRect().top + window.scrollY;
+          if (top <= scrollPosition) {
+            currentItem = item;
+          }
+        }
+
+        if (currentItem) {
+          setActive(currentItem.link);
+        }
+      };
+
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      handleScroll();
+    };
+
+    document.addEventListener("DOMContentLoaded", setupTocScrollspy);
+    document.addEventListener("astro:page-load", setupTocScrollspy);
+  </script>
+</BaseLayout>

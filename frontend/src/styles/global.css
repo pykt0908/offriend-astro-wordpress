@@ -1,0 +1,558 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+  scrollbar-gutter: stable;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+html.dark {
+  background-color: #070b14;
+  color: #f8fafc;
+}
+
+body {
+  background-color: inherit;
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-astro-transition]) {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Sidebar filter active hover fix: prevents hover:bg-slate-100 from washing out white text */
+.category-btn.bg-blue-800:hover,
+.format-btn.bg-blue-800:hover {
+  background-color: #1e3a8a !important;
+  color: #ffffff !important;
+}
+.category-btn.bg-blue-800:hover .category-icon,
+.format-btn.bg-blue-800:hover .format-icon {
+  color: #ffffff !important;
+}
+.category-btn.bg-blue-800:hover .category-count-badge,
+.format-btn.bg-blue-800:hover .format-count-badge {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+/* High-Contrast Text Selection */
+::selection,
+*::selection {
+  background-color: #162d59 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+html.dark ::selection,
+html.dark *::selection {
+  background-color: #f97316 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+
+/* Direct theme toggle icon switching rules */
+html.dark .theme-icon-sun {
+  display: block !important;
+}
+html.dark .theme-icon-moon {
+  display: none !important;
+}
+html:not(.dark) .theme-icon-sun {
+  display: none !important;
+}
+html:not(.dark) .theme-icon-moon {
+  display: block !important;
+}
+
+@font-face {
+  font-family: 'LINE Seed Sans TH';
+  src: url('/fonts/lineseed/LINESeedSansTH_W_Th.woff2') format('woff2');
+  font-weight: 100 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LINE Seed Sans TH';
+  src: url('/fonts/lineseed/LINESeedSansTH_W_Rg.woff2') format('woff2');
+  font-weight: 300 400 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LINE Seed Sans TH';
+  src: url('/fonts/lineseed/LINESeedSansTH_W_Bd.woff2') format('woff2');
+  font-weight: 600 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LINE Seed Sans TH';
+  src: url('/fonts/lineseed/LINESeedSansTH_W_XBd.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LINE Seed Sans TH';
+  src: url('/fonts/lineseed/LINESeedSansTH_W_He.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
+  --font-display: 'LINE Seed Sans TH', system-ui, sans-serif;
+  --font-content: 'Google Sans', 'Google Sans Flex', 'Noto Sans Thai', 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
+
+  /* Primary: Dark Navy Blue (สีน้ำเงินเข้ม พรีเมียม ปราศจากโทนเขียว teal) */
+  --color-brand-primary: #162d59;        /* deep classic navy blue */
+  --color-brand-primary-dark: #0a192f;   /* midnight navy blue */
+  --color-brand-primary-light: #2563eb;  /* royal blue accent */
+  /* Secondary/Accent: Orange */
+  --color-brand-accent: #f97316;
+  --color-brand-accent-dark: #ea580c;
+  /* Backgrounds */
+  --color-brand-dark: #060b18;
+  --color-brand-navy: #0a192f;
+  --color-brand-card: rgba(10, 24, 48, 0.75);
+}
+
+/* Light Theme Variables */
+:root {
+  --font-family-base: 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
+  --font-family-display: 'LINE Seed Sans TH', system-ui, sans-serif;
+  --font-family-content: 'Google Sans', 'Google Sans Flex', 'Noto Sans Thai', 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
+  --bg-primary: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-muted: #334155;
+  --text-subtle: #475569;
+  --border-card: #e2e8f0;
+  --border-glow: #162d59;
+  --header-bg: #ffffff;
+  --header-border: #e2e8f0;
+  --footer-bg: #f1f5f9;
+  --footer-border: #e2e8f0;
+  --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.07), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  --body-radial: 
+    radial-gradient(circle at 10% 15%, rgba(22, 45, 89, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 90% 75%, rgba(249, 115, 22, 0.04) 0%, transparent 45%);
+}
+
+/* Dark Theme Variables */
+html.dark {
+  --bg-primary: #060b18;
+  --bg-surface: #0a162b;
+  --bg-card: rgba(10, 24, 48, 0.75);
+  --text-primary: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-subtle: #64748b;
+  --border-card: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(249, 115, 22, 0.45);
+  --header-bg: rgba(6, 11, 24, 0.88);
+  --header-border: rgba(255, 255, 255, 0.1);
+  --footer-bg: rgba(6, 11, 24, 0.97);
+  --footer-border: rgba(255, 255, 255, 0.1);
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --body-radial: 
+    radial-gradient(circle at 10% 15%, rgba(22, 45, 89, 0.22) 0%, transparent 45%),
+    radial-gradient(circle at 90% 75%, rgba(249, 115, 22, 0.07) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(10, 24, 48, 0.15) 0%, transparent 60%);
+}
+
+html {
+  font-family: 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+body {
+  font-family: 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  background-image: var(--body-radial);
+  background-attachment: fixed;
+  overflow-x: clip;
+  letter-spacing: -0.01em;
+}
+
+/* Ensure no competing transitions or smooth-scroll animations during Astro page swaps */
+html[data-astro-transition],
+html[data-astro-transition] body,
+html[data-astro-transition] * {
+  scroll-behavior: auto !important;
+  transition: none !important;
+}
+
+/* 1. Header, Navbar, Menus, Dropdowns & Drawer: STRICTLY LINE Seed Sans TH */
+header,
+header *,
+nav,
+nav *,
+#mobile-drawer,
+#mobile-drawer *,
+footer nav,
+footer nav * {
+  font-family: 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif !important;
+}
+
+/* 2. Headings, Titles, Buttons & Badges: STRICTLY LINE Seed Sans TH */
+h1, h2, h3, h4, h5, h6,
+.font-display,
+.btn-brand-primary,
+.btn-brand-secondary,
+button {
+  font-family: 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+[role="button"],
+.category-btn,
+.format-btn,
+.sidebar-tab-btn {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 3. ONLY Content & Body Text: Uses Google Sans */
+p,
+article,
+article p,
+article li,
+.prose,
+.prose p,
+.prose li,
+.prose blockquote,
+.prose td,
+.prose th,
+.font-content,
+.content-text,
+.content-desc {
+  font-family: var(--font-family-content);
+}
+
+/* Logo Switching based on Theme */
+.logo-dark {
+  display: none;
+}
+.logo-light {
+  display: block;
+}
+
+html.dark .logo-dark {
+  display: block;
+}
+html.dark .logo-light {
+  display: none;
+}
+
+/* Cards (High Contrast in Light Mode, Glassmorphic in Dark Mode) */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel:hover {
+  border-color: var(--border-glow);
+  box-shadow: 0 10px 30px rgba(22, 45, 89, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Gradient Text (with headroom for Thai stacked diacritics / tone marks like ไม้โท) */
+.text-gradient {
+  background: linear-gradient(135deg, #0a192f 0%, #162d59 50%, #2563eb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  padding-top: 0.4em;
+  padding-bottom: 0.15em;
+  margin-top: -0.4em;
+  margin-bottom: -0.15em;
+  line-height: normal;
+}
+
+html.dark .text-gradient {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 50%, #fdba74 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Brand Buttons */
+.btn-brand-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.8rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.35);
+  transition: all 0.25s ease;
+  border: none;
+  cursor: pointer;
+}
+
+html.dark .btn-brand-primary {
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.4);
+}
+
+.btn-brand-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(249, 115, 22, 0.55);
+}
+
+.btn-brand-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.8rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(10px);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+html.dark .btn-brand-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+.btn-brand-secondary:hover {
+  border-color: rgba(249, 115, 22, 0.5);
+  transform: translateY(-2px);
+  color: #ea580c;
+}
+
+html.dark .btn-brand-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fb923c;
+}
+
+/* Blog Content Prose */
+.prose {
+  color: #334155;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+html.dark .prose {
+  color: #cbd5e1;
+}
+
+.prose p {
+  margin-bottom: 1.5rem;
+}
+
+.prose h2, .prose h3, .prose h4 {
+  color: #0f172a;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  line-height: 1.35;
+}
+
+html.dark .prose h2, html.dark .prose h3, html.dark .prose h4 {
+  color: #f8fafc;
+}
+
+.prose h2 {
+  font-size: 1.75rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  padding-bottom: 0.5rem;
+}
+
+html.dark .prose h2 {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.prose ul, .prose ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.75rem;
+}
+
+.prose li {
+  margin-bottom: 0.5rem;
+}
+
+.prose strong {
+  color: #0f172a;
+}
+
+html.dark .prose strong {
+  color: #ffffff;
+}
+
+.prose a {
+  color: #162d59;
+  text-decoration: underline;
+}
+
+html.dark .prose a {
+  color: #fb923c;
+}
+
+.prose blockquote {
+  border-left: 4px solid #162d59;
+  padding-left: 1.25rem;
+  margin-left: 0;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+  color: #475569;
+  background: rgba(22, 45, 89, 0.05);
+  border-radius: 0 8px 8px 0;
+  padding: 1rem 1.25rem;
+}
+
+html.dark .prose blockquote {
+  border-left: 4px solid #f97316;
+  color: #94a3b8;
+  background: rgba(249, 115, 22, 0.05);
+}
+
+/* =========================================================================
+   Silky-Smooth, Zero-Flicker View Transitions
+   ========================================================================= */
+
+/* 1. Header is permanently stable across navigations (Zero flicker, zero blink) */
+header {
+  view-transition-name: main-header;
+}
+::view-transition-group(main-header) {
+  animation: none !important;
+  z-index: 100;
+}
+::view-transition-old(main-header),
+::view-transition-new(main-header) {
+  animation: none !important;
+  mix-blend-mode: normal !important;
+}
+
+/* 2. Page Content: Zero-Blink Solid Dissolve */
+::view-transition-group(root) {
+  animation-duration: 220ms;
+}
+
+/* Old view stays 100% solid underneath so the white background never blinks through */
+::view-transition-old(root) {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+/* New view smoothly dissolves in on top */
+::view-transition-new(root) {
+  animation: 220ms cubic-bezier(0.2, 0, 0, 1) both vtFadeIn;
+  mix-blend-mode: normal !important;
+}
+
+@keyframes vtFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 3. Shared Tool Image Morphing (Smooth, balanced 0.46s, Apple Fluid Curve, Always Rounded 12px) */
+::view-transition-group(tool-image-corporate-budget-calculator),
+::view-transition-group(tool-image-project-roadmap-timeline),
+::view-transition-group(tool-image-invoice-quotation-generator),
+::view-transition-group(tool-image-team-kpi-performance-tracker),
+::view-transition-group(tool-image-marketing-content-calendar),
+::view-transition-group(tool-image-design-system-brand-kit),
+::view-transition-group(tool-image-ai-prompt-generator-workspace),
+::view-transition-group(tool-image-it-infrastructure-asset-tracker) {
+  animation-duration: 0.46s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: 0.75rem !important;
+  overflow: clip !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+}
+
+::view-transition-image-pair(tool-image-corporate-budget-calculator),
+::view-transition-image-pair(tool-image-project-roadmap-timeline),
+::view-transition-image-pair(tool-image-invoice-quotation-generator),
+::view-transition-image-pair(tool-image-team-kpi-performance-tracker),
+::view-transition-image-pair(tool-image-marketing-content-calendar),
+::view-transition-image-pair(tool-image-design-system-brand-kit),
+::view-transition-image-pair(tool-image-ai-prompt-generator-workspace),
+::view-transition-image-pair(tool-image-it-infrastructure-asset-tracker) {
+  border-radius: 0.75rem !important;
+  overflow: clip !important;
+}
+
+/* Keep the image completely solid from the first to last frame - NO FADING/GHOSTING */
+::view-transition-old(tool-image-corporate-budget-calculator),
+::view-transition-old(tool-image-project-roadmap-timeline),
+::view-transition-old(tool-image-invoice-quotation-generator),
+::view-transition-old(tool-image-team-kpi-performance-tracker),
+::view-transition-old(tool-image-marketing-content-calendar),
+::view-transition-old(tool-image-design-system-brand-kit),
+::view-transition-old(tool-image-ai-prompt-generator-workspace),
+::view-transition-old(tool-image-it-infrastructure-asset-tracker) {
+  animation: none;
+  opacity: 0;
+  display: none;
+  border-radius: 0.75rem !important;
+  overflow: clip !important;
+}
+
+::view-transition-new(tool-image-corporate-budget-calculator),
+::view-transition-new(tool-image-project-roadmap-timeline),
+::view-transition-new(tool-image-invoice-quotation-generator),
+::view-transition-new(tool-image-team-kpi-performance-tracker),
+::view-transition-new(tool-image-marketing-content-calendar),
+::view-transition-new(tool-image-design-system-brand-kit),
+::view-transition-new(tool-image-ai-prompt-generator-workspace),
+::view-transition-new(tool-image-it-infrastructure-asset-tracker) {
+  animation: none;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 0.75rem !important;
+  overflow: clip !important;
+  mix-blend-mode: normal;
+}
+
+
+
+
+

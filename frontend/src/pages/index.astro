@@ -1,0 +1,287 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroCarousel from '../components/HeroCarousel';
+import PostCard from '../components/PostCard.astro';
+import ToolCard from '../components/ToolCard.astro';
+import { getPosts, getTools, getSiteSettings } from '../lib/wordpress';
+import { ArrowUpRight } from 'lucide-react';
+export const prerender = false;
+
+const posts = await getPosts({ perPage: 3 });
+const tools = await getTools({ perPage: 8 });
+const siteSettings = await getSiteSettings();
+
+
+const workSteps = [
+  {
+    step: '1',
+    title: 'เข้าใจโจทย์',
+    desc: 'คุยกับเจ้าของงาน ระบุปัญหาจริง และผลลัพธ์ที่อยากให้เกิดขึ้น',
+  },
+  {
+    step: '2',
+    title: 'วางแผนและออกแบบ',
+    desc: 'เลือกเทคโนโลยีที่เหมาะสม ออกแบบหน้าจอ และกำหนดขอบเขตงานที่พอดี',
+  },
+  {
+    step: '3',
+    title: 'ทดลองกับงานจริง',
+    desc: 'สร้างชิ้นงานต้นแบบ ทดสอบกับข้อมูลและผู้ใช้งานจริงเพื่อตรวจสอบผลลัพธ์',
+  },
+  {
+    step: '4',
+    title: 'วัดผลและดูแลต่อ',
+    desc: 'ตรวจวัดประสิทธิภาพการทำงานจริง พร้อมทีมงานคอยซัพพอร์ตและต่อยอดในอนาคต',
+  },
+];
+
+const enterpriseSolutions = [
+  {
+    category: 'คนทำงาน & ออฟฟิศ',
+    title: 'เครื่องมือ & เทมเพลตใช้งานฟรี',
+    desc: 'รวมไฟล์เทมเพลต เครื่องมือคำนวณงบ และแบบฟอร์มสำเร็จรูปสำหรับคนออฟฟิศ โหลดไปปรับใช้กับงานจริงได้ทันที ช่วยประหยัดเวลาทำงาน',
+    linkText: 'ดูเครื่องมือและเทมเพลตฟรี',
+    href: '/tools',
+    image: '/images/solutions/office-tools.jpg',
+    imageAlt: 'Office productivity tools and workspace',
+  },
+  {
+    category: 'ธุรกิจ & ร้านค้า',
+    title: 'ออกแบบและพัฒนาเว็บไซต์ / เว็บแอป',
+    desc: 'รับทำเว็บไซต์บริษัท ระบบร้านค้า และเว็บแอปพลิเคชันตามสั่ง ดีไซน์ทันสมัย ใช้งานง่ายทั้งบนคอมและมือถือ ตอบโจทย์การใช้งานจริง',
+    linkText: 'ปรึกษาและประเมินราคา',
+    href: '/contact',
+    image: '/images/solutions/web-development.jpg',
+    imageAlt: 'Web development and software engineering',
+  },
+  {
+    category: 'การตลาด & คอนเทนต์',
+    title: 'ทำเว็บ WordPress โหลดเร็ว ดูแลง่าย',
+    desc: 'สร้างเว็บไซต์ด้วย WordPress ที่ทีมงานอัปเดตบทความและรูปภาพเองได้สะดวก พร้อมปรับแต่งให้เปิดหน้าเว็บได้ไว ปลอดภัย และติด SEO ง่าย',
+    linkText: 'ดูแนวทางทำเว็บ WordPress',
+    href: '/services#headless-cms',
+    image: '/images/solutions/cloud-architecture.jpg',
+    imageAlt: 'WordPress web design and cloud systems',
+  },
+  {
+    category: 'หน่วยงาน & องค์กร',
+    title: 'พัฒนาระบบเฉพาะทาง & ดูแลต่อเนื่อง',
+    desc: 'รับเขียนโปรแกรมและระบบงานเฉพาะด้าน เชื่อมต่อฐานข้อมูล พร้อมทีมงานคอยดูแลและให้คำปรึกษาหลังส่งมอบงาน ไม่ทิ้งงานแน่นอน',
+    linkText: 'พูดคุยโจทย์งานกับเรา',
+    href: '/contact',
+    image: '/images/solutions/enterprise-consult.jpg',
+    imageAlt: 'Corporate consultation and system development',
+  },
+];
+---
+
+<BaseLayout
+  title="Offriend — ผู้นำด้านการพัฒนาซอฟต์แวร์ คลาวด์ และดิจิทัลโซลูชัน"
+  description="Offriend ให้บริการพัฒนาซอฟต์แวร์ เว็บแอปพลิเคชัน แอปมือถือ คลาวด์ และ Headless CMS ขับเคลื่อนธุรกิจสู่อนาคตดิจิทัล"
+>
+  <!-- Hero Carousel Section (1920x800) -->
+  <section class="relative w-full overflow-hidden bg-slate-950">
+    <HeroCarousel client:load slides={siteSettings.banners ?? []} />
+
+  </section>
+
+  <!-- Enterprise Solutions & Office Tools Section (Compact Single-Screen Viewport) -->
+  <section id="enterprise-solutions" class="py-8 sm:py-10 lg:py-12 border-b border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-[#060a12]/60 transition-colors relative overflow-hidden">
+    <!-- Subtle Ambient Glow -->
+    <div class="absolute top-1/2 left-0 -translate-y-1/2 w-80 h-80 bg-[#162d59]/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute top-1/2 right-0 -translate-y-1/2 w-80 h-80 bg-[#162d59]/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <!-- Section Header (Compact) -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+        <div>
+          <!-- Minimal Section Kicker -->
+          <div class="flex items-center gap-2 mb-2.5">
+            <span class="w-4 h-0.5 bg-[#162d59] dark:bg-indigo-300 rounded-full inline-block"></span>
+            <span class="text-xs font-bold tracking-wider uppercase text-[#060c2e] dark:text-[#38bdf8]">
+              สำหรับคนทำงาน &amp; องค์กร
+            </span>
+          </div>
+          <!-- Title -->
+          <h2 class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white leading-normal">
+            เครื่องมือและบริการดิจิทัล <span class="text-gradient">เพื่อช่วยให้คุณทำงานง่ายขึ้น</span>
+          </h2>
+        </div>
+        <!-- Right Subtitle -->
+        <p class="text-slate-600 dark:text-slate-400 text-xs sm:text-sm max-w-sm leading-relaxed font-content">
+          เลือกสิ่งที่ตอบโจทย์งานของคุณ ทั้งเครื่องมือช่วยทำงานฟรี และบริการพัฒนาเว็บไซต์/ระบบ
+        </p>
+      </div>
+
+      <!-- 2x2 Grid of Compact Cards (Fits on single screen) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+        {
+          enterpriseSolutions.map((item) => (
+            <div class="group relative rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0e1526] shadow-xs hover:shadow-lg hover:border-[#162d59]/40 transition-all duration-200 overflow-hidden flex flex-col justify-between">
+              <div class="grid grid-cols-1 md:grid-cols-12 min-h-[175px] sm:min-h-[190px] h-full">
+                <!-- Left: Content Info -->
+                <div class="md:col-span-7 p-4 sm:p-5 flex flex-col justify-between z-10 relative">
+                  <div>
+                    <!-- Minimal Category Tag -->
+                    <span class="text-xs font-bold text-[#060c2e] dark:text-[#38bdf8] tracking-wide mb-1.5 block">
+                      {item.category}
+                    </span>
+                    <!-- Title -->
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-1.5 group-hover:text-[#060c2e] dark:group-hover:text-[#38bdf8] transition-colors">
+                      {item.title}
+                    </h3>
+                    <!-- Grounded Description -->
+                    <p class="text-xs sm:text-[13px] text-slate-600 dark:text-slate-300 leading-relaxed font-content mb-3">
+                      {item.desc}
+                    </p>
+                  </div>
+
+                  <div class="pt-2 border-t border-slate-100 dark:border-white/5 mt-auto">
+                    <a
+                      href={item.href}
+                      class="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-[#060c2e] dark:text-[#38bdf8] hover:text-[#0a192f] dark:hover:text-[#93c5fd] transition-colors group/link cursor-pointer"
+                    >
+                      <span>{item.linkText}</span>
+                      <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Right: Illustration with Fade Mask -->
+                <div class="md:col-span-5 relative overflow-hidden min-h-[140px] md:min-h-full">
+                  <img
+                    src={item.image}
+                    alt={item.imageAlt}
+                    class="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <!-- Desktop Fade Mask -->
+                  <div class="absolute inset-0 bg-gradient-to-r from-white via-white/80 dark:from-[#0e1526] dark:via-[#0e1526]/80 to-transparent pointer-events-none hidden md:block"></div>
+                  <!-- Mobile Fade Mask -->
+                  <div class="absolute inset-0 bg-gradient-to-b from-white via-white/40 dark:from-[#0e1526] dark:via-[#0e1526]/40 to-transparent pointer-events-none md:hidden"></div>
+                </div>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- Work Process Section (Clean Minimal 4-Steps) -->
+  <section class="py-14 sm:py-16 border-b border-slate-200 dark:border-white/10 bg-white dark:bg-[#070b14] transition-colors">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Section Title -->
+      <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-8 sm:mb-10">
+        ให้ทุกระบบและงานดิจิทัล มีแผนไปต่อที่ชัดเจน
+      </h2>
+
+      <!-- 4 Columns with Top Border -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+        {
+          workSteps.map((step) => (
+            <div class="pt-6 border-t-2 border-blue-100 dark:border-white/10">
+              <div class="w-7 h-7 rounded-full bg-[#162d59] dark:bg-[#162d59] text-white font-bold text-xs flex items-center justify-center mb-4">
+                {step.step}
+              </div>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-2">
+                {step.title}
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-content">
+                {step.desc}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+
+      <!-- Explanatory Note -->
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-10 mb-6 max-w-3xl leading-relaxed font-content">
+        ตัวอย่างแนวทางทำงานร่วมกัน ขอบเขตการพัฒนาระบบ การทดสอบใช้งาน และการดูแลต่อเนื่อง จะตกลงร่วมกันตามความเหมาะสมของแต่ละองค์กร
+      </p>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap items-center gap-3">
+        <a
+          href="/contact"
+          class="inline-flex items-center gap-2 bg-[#162d59] hover:bg-[#0a192f] dark:bg-[#060c2e] dark:hover:bg-[#162d59] text-white font-bold text-sm px-5 py-2.5 rounded-lg shadow-xs transition-colors"
+        >
+          <span>ปรึกษาโจทย์งานกับเรา</span>
+          <span class="text-base">→</span>
+        </a>
+        <a
+          href="/services"
+          class="inline-flex items-center bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-white/20 hover:border-slate-400 font-bold text-sm px-5 py-2.5 rounded-lg shadow-xs transition-colors"
+        >
+          ดูบริการสำหรับองค์กร
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Free Tools & Templates Section (Grid 4 Columns matching screenshot) -->
+  <section id="free-tools" class="py-12 sm:py-16 lg:py-20 border-t border-slate-200 dark:border-white/10 relative transition-colors">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10">
+        <div>
+          <!-- Kicker matching reference screenshot -->
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-5 h-1 bg-red-500 rounded-full inline-block"></span>
+            <span class="text-xs sm:text-sm font-bold tracking-wide text-red-500">
+              แนะนำปี 2026
+            </span>
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-display">
+            เครื่องมือฟรีและเทมเพลต
+          </h2>
+        </div>
+
+        <!-- View All Button matching reference screenshot -->
+        <a
+          href="/tools"
+          class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-white/10 font-bold text-sm px-5 py-2.5 rounded-lg shadow-xs transition-all hover:translate-x-0.5 self-start sm:self-auto"
+        >
+          <span>ดูเครื่องมือทั้งหมด</span>
+          <span class="text-base">→</span>
+        </a>
+      </div>
+
+      <!-- 4-Column Grid with 16:9 images -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {tools.map((tool) => (
+          <ToolCard tool={tool} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- News & Insights (From Headless WordPress) -->
+  <section class="py-20 border-t border-slate-200 dark:border-white/10 relative transition-colors">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-[#060c2e] dark:text-[#38bdf8]">LATEST ARTICLES & NEWS</span>
+          <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-2">ข่าวสารและบทความล่าสุด</h2>
+          <p class="text-slate-700 dark:text-slate-300 text-sm sm:text-base mt-1 font-normal">
+            อัปเดตบทความและข่าวสารสดใหม่ได้เลย
+          </p>
+        </div>
+        <a href="/blog" class="text-sm font-semibold text-[#060c2e] dark:text-[#38bdf8] hover:text-[#162d59] flex items-center gap-1.5 transition-colors">
+          ดูคลังบทความทั้งหมด <span>→</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {
+          posts.map((post) => (
+            <PostCard post={post} />
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>

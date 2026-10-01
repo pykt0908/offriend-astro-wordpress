@@ -1,0 +1,104 @@
+﻿---
+// ThemeToggle.astro
+import { Sun, Moon } from 'lucide-react';
+
+interface Props {
+  variant?: 'icon' | 'switch';
+  class?: string;
+}
+
+const { variant = 'icon', class: className = '' } = Astro.props;
+---
+
+{
+  variant === 'icon' ? (
+    <button
+      type="button"
+      class:list={[
+        'theme-toggle-btn h-10 w-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-amber-300 transition-all shadow-xs focus:outline-none cursor-pointer group',
+        className,
+      ]}
+      aria-label="Toggle Color Theme"
+      title="สลับโหมดสว่าง / มืด"
+    >
+      <Sun className="theme-icon-sun w-4 h-4 text-amber-400 transition-transform duration-300 group-hover:rotate-45" />
+      <Moon className="theme-icon-moon w-4 h-4 text-slate-700 transition-transform duration-300 group-hover:-rotate-12" />
+    </button>
+  ) : (
+    /* Segmented switch style with Lucide icons (no emojis) */
+    <div
+      class:list={[
+        'inline-flex items-center p-1 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-xs shadow-xs',
+        className,
+      ]}
+    >
+      <button
+        type="button"
+        data-theme-set="light"
+        class="theme-switch-opt h-8 px-3 rounded-md flex items-center justify-center gap-1.5 transition-all font-bold text-slate-700 dark:text-slate-400 [&.active]:bg-gradient-to-r [&.active]:from-[#162d59] [&.active]:to-[#0a2d38] [&.active]:text-white dark:[&.active]:from-blue-600 dark:[&.active]:to-blue-600 cursor-pointer"
+        aria-label="โหมดสว่าง"
+      >
+        <Sun className="w-3.5 h-3.5" />
+        <span>สว่าง</span>
+      </button>
+      <button
+        type="button"
+        data-theme-set="dark"
+        class="theme-switch-opt h-8 px-3 rounded-md flex items-center justify-center gap-1.5 transition-all font-bold text-slate-700 dark:text-slate-400 [&.active]:bg-gradient-to-r [&.active]:from-[#162d59] [&.active]:to-[#0a2d38] [&.active]:text-white dark:[&.active]:from-blue-600 dark:[&.active]:to-blue-600 cursor-pointer"
+        aria-label="โหมดมืด"
+      >
+        <Moon className="w-3.5 h-3.5" />
+        <span>มืด</span>
+      </button>
+    </div>
+  )
+}
+
+<script>
+  function setupThemeToggle() {
+    const iconBtns = document.querySelectorAll('.theme-toggle-btn');
+    const switchBtns = document.querySelectorAll<HTMLButtonElement>('.theme-switch-opt');
+
+    const updateActiveState = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      switchBtns.forEach((btn) => {
+        const target = btn.getAttribute('data-theme-set');
+        if ((target === 'dark' && isDark) || (target === 'light' && !isDark)) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    };
+
+    iconBtns.forEach((btn) => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        updateActiveState();
+      };
+    });
+
+    switchBtns.forEach((btn) => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        const target = btn.getAttribute('data-theme-set');
+        if (target === 'dark') {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+        }
+        updateActiveState();
+      };
+    });
+
+    updateActiveState();
+  }
+
+  setupThemeToggle();
+  document.addEventListener('astro:page-load', setupThemeToggle);
+  document.addEventListener('astro:after-swap', setupThemeToggle);
+</script>

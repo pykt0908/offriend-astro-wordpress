@@ -1,0 +1,733 @@
+﻿---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { getTools } from '../../lib/wordpress';
+import {
+  Sparkles,
+  Calculator,
+  Kanban,
+  Receipt,
+  Users,
+  Megaphone,
+  Palette,
+  Bot,
+  Server,
+  CheckCircle2,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  Search,
+  LayoutGrid,
+  List,
+  ArrowRight,
+  FolderOpen,
+  Laptop,
+  Layers,
+  ChevronRight,
+  Filter,
+  X
+} from 'lucide-react';
+
+export const prerender = true;
+
+const tools = await getTools({ perPage: 24 });
+
+// Categories definition matching Offriend's brand and business tools
+const categories = [
+  { id: 'all', name: 'ทั้งหมด', icon: Sparkles, color: 'text-[#162d59]' },
+  { id: 'finance', name: 'การเงิน & บัญชี', icon: Calculator, color: 'text-emerald-500' },
+  { id: 'project', name: 'บริหารโครงการ', icon: Kanban, color: 'text-[#162d59]' },
+  { id: 'sales', name: 'เอกสาร & การขาย', icon: Receipt, color: 'text-indigo-500' },
+  { id: 'hr', name: 'ทรัพยากรบุคคล & KPI', icon: Users, color: 'text-rose-500' },
+  { id: 'marketing', name: 'การตลาด & แผนงาน', icon: Megaphone, color: 'text-amber-500' },
+  { id: 'design', name: 'ออกแบบ & กราฟิก', icon: Palette, color: 'text-fuchsia-500' },
+  { id: 'ai', name: 'ปัญญาประดิษฐ์ & AI', icon: Bot, color: 'text-cyan-500' },
+  { id: 'it', name: 'ไอที & ระบบเน็ตเวิร์ก', icon: Server, color: 'text-blue-500' },
+];
+
+// Software / Program formats definition
+const formats = [
+  { id: 'all', name: 'ทุกรูปแบบโปรแกรม' },
+  { id: 'excel', name: 'Microsoft Excel' },
+  { id: 'sheets', name: 'Google Sheets' },
+  { id: 'web', name: 'Web Application' },
+  { id: 'design', name: 'Figma & Canva' },
+  { id: 'doc', name: 'PDF & เอกสาร' },
+];
+
+// Helper to count tools per category
+const getCategoryCount = (catId: string) => {
+  if (catId === 'all') return tools.length;
+  return tools.filter((t) => (t.tool_meta?.category_slug || '').toLowerCase() === catId.toLowerCase()).length;
+};
+
+// Helper to count tools per format
+const getFormatCount = (fmtId: string) => {
+  if (fmtId === 'all') return tools.length;
+  return tools.filter((t) => {
+    const fmt = (t.tool_meta?.format || '').toLowerCase();
+    if (fmtId === 'excel') return fmt.includes('excel');
+    if (fmtId === 'sheets') return fmt.includes('sheets');
+    if (fmtId === 'web') return fmt.includes('web');
+    if (fmtId === 'design') return fmt.includes('figma') || fmt.includes('canva');
+    if (fmtId === 'doc') return fmt.includes('pdf') || fmt.includes('form');
+    return false;
+  }).length;
+};
+---
+
+<BaseLayout
+  title="เครื่องมือและเทมเพลตทั้งหมด | Offriend"
+  description="รวมไฟล์เทมเพลต เครื่องมือคำนวณงบประมาณ ระบบช่วยทำงานสำเร็จรูปสำหรับคนออฟฟิศและธุรกิจ นำไปปรับใช้กับงานของคุณได้ฟรีทันที"
+>
+  <!-- 1. HERO HEADER: Offriend Brand Navy / Blue with Topo Waves & Glow Accents -->
+  <PageHeader
+    maxWidth="max-w-screen-2xl"
+    breadcrumbs={[
+      { label: 'หน้าแรก', href: '/' },
+      { label: 'เครื่องมือ & เทมเพลต' },
+    ]}
+    kicker="เครื่องมือทำงานและเทมเพลต"
+    title="เครื่องมือและเทมเพลตทั้งหมด"
+    description="รวมเทมเพลต และระบบสำเร็จรูปสำหรับคนออฟฟิศและองค์กรธุรกิจ นำไปใช้งานกับงานจริงได้ฟรี 100%"
+  />
+
+  <!-- 2. MAIN WORKSPACE WITH STICKY SIDEBAR -->
+  <div class="py-8 sm:py-12 bg-slate-50/50 dark:bg-[#070b14] transition-colors">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- LEFT COLUMN: STICKY SIDEBAR -->
+        <aside class="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-24 space-y-4">
+          
+          <!-- Segmented Tab Header: [หมวดหมู่] vs [โปรแกรม 44] -->
+          <div class="bg-slate-200/80 dark:bg-white/10 p-1 rounded-xl border border-slate-300/40 dark:border-white/5 flex items-center gap-1 font-display">
+            <button
+              type="button"
+              id="tab-btn-category"
+              class="sidebar-tab-btn flex-1 py-2 px-3 rounded-lg text-xs sm:text-sm font-bold text-center transition-all bg-white dark:bg-[#0c1222] text-[#060c2e] dark:text-[#38bdf8] shadow-xs border border-slate-200/50 dark:border-white/5 select-none cursor-pointer focus:outline-none"
+              data-tab="category"
+            >
+              หมวดหมู่
+            </button>
+            <button
+              type="button"
+              id="tab-btn-format"
+              class="sidebar-tab-btn flex-1 py-2 px-3 rounded-lg text-xs sm:text-sm font-medium text-center transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-transparent select-none cursor-pointer focus:outline-none"
+              data-tab="format"
+            >
+              โปรแกรม <span class="tab-format-count text-xs font-normal text-slate-500 dark:text-slate-400 ml-1.5 select-none">{tools.length}</span>
+            </button>
+          </div>
+
+          <!-- TAB CONTENT 1: CATEGORIES LIST -->
+          <div id="tab-content-category" class="bg-white dark:bg-[#0c1222] rounded-xl border border-slate-200 dark:border-white/10 p-2 sm:p-2.5 shadow-xs space-y-1">
+            {categories.map((cat) => {
+              const Icon = cat.icon;
+              const count = getCategoryCount(cat.id);
+              const isActive = cat.id === 'all';
+              return (
+                <button
+                  type="button"
+                  data-filter-category={cat.id}
+                  data-icon-color={cat.color}
+                  class:list={[
+                    'category-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all cursor-pointer text-left group select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#162d59]',
+                    isActive
+                      ? 'bg-[#060c2e] hover:bg-[#0a192f] text-white font-bold shadow-xs'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 font-medium'
+                  ]}
+                >
+                  <div class="flex items-center gap-2.5 truncate pointer-events-none select-none">
+                    <Icon class={`category-icon w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : cat.color}`} />
+                    <span class="category-name truncate select-none">{cat.name}</span>
+                  </div>
+                  <span
+                    class:list={[
+                      'category-count-badge px-2 py-0.5 rounded-md text-[11px] font-semibold shrink-0 transition-colors pointer-events-none select-none',
+                      isActive
+                        ? 'bg-white/20 text-white'
+                        : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-white/10'
+                    ]}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <!-- TAB CONTENT 2: SOFTWARE / FORMATS LIST (Hidden by default) -->
+          <div id="tab-content-format" class="hidden bg-white dark:bg-[#0c1222] rounded-xl border border-slate-200 dark:border-white/10 p-2 sm:p-2.5 shadow-xs space-y-1">
+            {formats.map((fmt) => {
+              const count = getFormatCount(fmt.id);
+              const isActive = fmt.id === 'all';
+              return (
+                <button
+                  type="button"
+                  data-filter-format={fmt.id}
+                  class:list={[
+                    'format-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-all cursor-pointer text-left group select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#162d59]',
+                    isActive
+                      ? 'bg-[#060c2e] hover:bg-[#0a192f] text-white font-bold shadow-xs'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 font-medium'
+                  ]}
+                >
+                  <div class="flex items-center gap-2.5 truncate pointer-events-none select-none">
+                    <Laptop class={`format-icon w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-[#060c2e] dark:text-[#38bdf8]'}`} />
+                    <span class="format-name truncate select-none">{fmt.name}</span>
+                  </div>
+                  <span
+                    class:list={[
+                      'format-count-badge px-2 py-0.5 rounded-md text-[11px] font-semibold shrink-0 transition-colors pointer-events-none select-none',
+                      isActive
+                        ? 'bg-white/20 text-white'
+                        : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-white/10'
+                    ]}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <!-- Enterprise Callout in Sidebar -->
+          <div class="bg-gradient-to-br from-sky-950/15 via-slate-100 to-blue-950/15 dark:from-[#0b1b2b] dark:to-[#081220] rounded-xl border border-[#162d59]/20 p-4 text-xs font-content">
+            <div class="flex items-center gap-2 text-[#060c2e] dark:text-[#38bdf8] font-bold mb-1.5 font-display">
+              <Sparkles className="w-4 h-4 shrink-0" />
+              <span>ต้องการระบบเฉพาะทาง?</span>
+            </div>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
+              Offriend รับออกแบบและพัฒนาเทมเพลต Excel/Sheets หรือแปลงเป็น Web App เชื่อมฐานข้อมูลสำหรับองค์กร
+            </p>
+            <a
+              href="/contact"
+              class="inline-flex items-center gap-1 font-bold text-[#060c2e] dark:text-[#38bdf8] hover:text-[#0a192f] dark:hover:text-[#93c5fd]"
+            >
+              <span>ติดต่อสอบถามทีมวิศวกร</span>
+              <span>→</span>
+            </a>
+          </div>
+
+        </aside>
+
+        <!-- RIGHT COLUMN: MAIN TOOLS LISTING -->
+        <main class="lg:col-span-8 xl:col-span-9 space-y-6">
+          
+          <!-- TOP TOOLBAR: COUNTER + SEARCH + VIEW SWITCHER -->
+          <div class="bg-white dark:bg-[#0c1222] p-3 sm:p-4 rounded-xl border border-slate-200 dark:border-white/10 shadow-xs flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- Results Counter (Left) -->
+            <div class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 font-content">
+              <span id="tools-counter-num" class="font-extrabold text-slate-900 dark:text-white font-display text-sm sm:text-base">
+                {tools.length}
+              </span>
+              <span> รายการ • หน้า 1 จาก 1</span>
+            </div>
+
+            <!-- Search Box & View Mode (Right) -->
+            <div class="flex items-center gap-3 w-full sm:w-auto flex-1 sm:flex-initial justify-end">
+              <!-- Search Input -->
+              <div class="relative flex-1 sm:w-64 md:w-80">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  id="tool-search-input"
+                  placeholder="ค้นหาเครื่องมือหรือเทมเพลต..."
+                  class="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-[#162d59] focus:ring-1 focus:ring-[#162d59] transition-all font-content"
+                />
+                <button
+                  type="button"
+                  id="clear-search-btn"
+                  class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
+                  aria-label="ล้างคำค้นหา"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <!-- View Mode Toggle Buttons (List View vs Grid View) -->
+              <div class="flex items-center bg-slate-100 dark:bg-slate-900/80 p-1 rounded-lg border border-slate-200 dark:border-white/10 shrink-0">
+                <button
+                  type="button"
+                  id="view-mode-list-btn"
+                  title="แสดงผลแบบรายการ (List View)"
+                  class="p-1.5 rounded-md text-xs font-bold transition-all bg-white dark:bg-[#0c1222] text-[#060c2e] dark:text-[#38bdf8] shadow-xs"
+                  aria-label="แสดงผลแบบรายการ"
+                >
+                  <List className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  id="view-mode-grid-btn"
+                  title="แสดงผลแบบกริด (Grid View)"
+                  class="p-1.5 rounded-md text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                  aria-label="แสดงผลแบบกริด"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Active Filter Pill Bar (Shown when a filter is active) -->
+          <div id="active-filter-bar" class="hidden items-center gap-2 text-xs font-content">
+            <span class="text-slate-400">ตัวกรองปัจจุบัน:</span>
+            <div id="filter-tag-pill" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 dark:bg-sky-950/60 border border-[#162d59]/30 text-[#0a192f] dark:text-[#93c5fd] font-semibold">
+              <span id="filter-tag-text">ทั้งหมด</span>
+              <button type="button" id="reset-filter-btn" class="hover:text-sky-900 dark:hover:text-white">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. TOOLS CONTAINER: LIST VIEW BY DEFAULT -->
+          <div id="tools-container" class="space-y-4 font-content">
+            {tools.map((tool) => {
+              const featuredImage =
+                tool.featured_image_url ||
+                tool._embedded?.['wp:featuredmedia']?.[0]?.source_url ||
+                '/images/tools/budget-calculator.jpg';
+              const rawExcerpt = tool.excerpt?.rendered || '';
+              const cleanExcerpt = rawExcerpt.replace(/<[^>]+>/g, '').trim();
+              const category = tool.tool_meta?.category || 'เครื่องมือฟรี';
+              const categorySlug = (tool.tool_meta?.category_slug || 'other').toLowerCase();
+              const format = tool.tool_meta?.format || 'Template & Tool';
+              const badge = tool.tool_meta?.badge || '';
+              const downloads = tool.tool_meta?.downloads || 'ใช้งานฟรี';
+              const version = tool.tool_meta?.version || '2026';
+              const cleanTitle = tool.title.rendered.replace(/<[^>]+>/g, '');
+
+              return (
+                <article
+                  class="tool-card group bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-xs hover:shadow-xl hover:border-[#162d59]/40 dark:hover:border-indigo-300/40 transition-all duration-300 flex flex-col md:flex-row gap-5 items-stretch md:items-center"
+                  data-slug={tool.slug}
+                  data-category={categorySlug}
+                  data-format={format.toLowerCase()}
+                  data-title={cleanTitle.toLowerCase()}
+                  data-excerpt={cleanExcerpt.toLowerCase()}
+                >
+                  <!-- 16:9 Thumbnail (Left) with Smooth Morph Transition -->
+                  <a
+                    href={`/tools/${tool.slug}`}
+                    data-astro-prefetch="hover"
+                    class="block relative w-full md:w-60 lg:w-64 aspect-video shrink-0 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200/60 dark:border-white/5"
+                  >
+                    <img
+                      src={featuredImage}
+                      alt={cleanTitle}
+                      transition:name={`tool-image-${tool.slug}`}
+                      class="w-full h-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-105"
+                      loading="eager"
+                      decoding="async"
+                    />
+                    {badge && (
+                      <div class="absolute top-2.5 left-2.5">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/95 dark:bg-[#070b14]/90 backdrop-blur-md text-[#0a192f] dark:text-[#93c5fd] border border-slate-200/80 dark:border-white/10 shadow-xs">
+                          <Sparkles className="w-2.5 h-2.5 text-[#162d59]" />
+                          {badge}
+                        </span>
+                      </div>
+                    )}
+                  </a>
+
+                  <!-- Center Content: Kicker + Title + Excerpt + Meta Specs -->
+                  <div class="flex-1 min-w-0 flex flex-col justify-between">
+                    <div>
+                      <!-- Category Kicker Tag -->
+                      <div class="text-[11px] sm:text-xs font-bold text-[#060c2e] dark:text-[#38bdf8] uppercase tracking-wider mb-1.5 flex items-center gap-2">
+                        <span>{category}</span>
+                        <span class="text-slate-300 dark:text-slate-700">•</span>
+                        <span class="text-slate-500 dark:text-slate-400 font-normal">{format}</span>
+                      </div>
+
+                      <!-- Title -->
+                      <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#060c2e] dark:group-hover:text-[#38bdf8] transition-colors font-display line-clamp-2 leading-snug mb-1.5">
+                        <a href={`/tools/${tool.slug}`} data-astro-prefetch="hover">
+                          {cleanTitle}
+                        </a>
+                      </h2>
+
+                      <!-- Excerpt -->
+                      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-content line-clamp-2 leading-relaxed mb-3">
+                        {cleanExcerpt}
+                      </p>
+                    </div>
+
+                    <!-- Meta specs row & Link -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-white/5 text-xs text-slate-500 dark:text-slate-400">
+                      <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center gap-1.5">
+                          <FileSpreadsheet className="w-3.5 h-3.5 text-[#162d59] shrink-0" />
+                          <span>{version}</span>
+                        </div>
+                        <span class="text-slate-300 dark:text-slate-700">•</span>
+                        <div class="flex items-center gap-1.5">
+                          <Download className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <span>{downloads}</span>
+                        </div>
+                      </div>
+
+                      <a
+                        href={`/tools/${tool.slug}`}
+                        data-astro-prefetch="hover"
+                        class="inline-flex items-center gap-1 text-xs font-bold text-[#060c2e] dark:text-[#38bdf8] hover:text-[#0a192f] dark:hover:text-[#93c5fd] transition-colors group/arrow"
+                      >
+                        <span>ดูรายละเอียด</span>
+                        <ArrowRight className="w-3 h-3 transition-transform group-hover/arrow:translate-x-0.5" />
+                      </a>
+                    </div>
+                  </div>
+
+                  <!-- Right Column: Price & Action CTA -->
+                  <div class="tool-card-right md:border-l md:border-slate-100 md:dark:border-white/5 md:pl-5 flex md:flex-col items-center justify-between md:justify-center gap-3 shrink-0 md:min-w-[130px]">
+                    <div class="text-left md:text-center">
+                      <span class="text-[11px] text-slate-400 dark:text-slate-500 block">สิทธิ์การใช้งาน</span>
+                      <span class="text-base sm:text-lg font-extrabold text-emerald-600 dark:text-emerald-400 font-display">
+                        ฟรี 100%
+                      </span>
+                    </div>
+
+                    <a
+                      href={`/tools/${tool.slug}`}
+                      data-astro-prefetch="hover"
+                      class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold border border-slate-300 dark:border-white/10 hover:border-[#162d59] dark:hover:border-indigo-300 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-slate-800 dark:text-slate-200 hover:text-[#060c2e] dark:hover:text-[#38bdf8] transition-all shadow-xs shrink-0"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>ขอไฟล์ฟรี</span>
+                    </a>
+                  </div>
+
+                </article>
+              );
+            })}
+          </div>
+
+          <!-- Empty State (Shown when search/filter yields 0 results) -->
+          <div id="no-results-state" class="hidden bg-white dark:bg-[#0c1222] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
+            <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-4 text-slate-400">
+              <Search className="w-8 h-8" />
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white font-display mb-1">
+              ไม่พบเครื่องมือหรือเทมเพลตที่ค้นหา
+            </h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 font-content mb-5">
+              ลองค้นหาด้วยคำอื่น หรือเลือกหมวดหมู่อื่นเพื่อดูรายการทั้งหมด
+            </p>
+            <button
+              type="button"
+              id="clear-all-filters-btn"
+              class="inline-flex items-center gap-2 bg-[#060c2e] hover:bg-[#162d59] text-white font-bold text-xs px-5 py-2.5 rounded-lg transition-colors shadow-xs cursor-pointer"
+            >
+              <span>ล้างตัวกรองทั้งหมด</span>
+            </button>
+          </div>
+
+        </main>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CLIENT-SIDE SCRIPT FOR DYNAMIC FILTERING, TABS & VIEW SWITCHER -->
+  <script is:inline>
+    const setupToolsPage = () => {
+      let activeCategory = 'all';
+      let activeFormat = 'all';
+      let activeTab = 'category';
+      let activeViewMode = 'list'; // 'list' or 'grid'
+
+      // DOM Elements
+      const tabCategoryBtn = document.getElementById('tab-btn-category');
+      const tabFormatBtn = document.getElementById('tab-btn-format');
+      const tabCategoryContent = document.getElementById('tab-content-category');
+      const tabFormatContent = document.getElementById('tab-content-format');
+      const searchInput = document.getElementById('tool-search-input');
+      const clearSearchBtn = document.getElementById('clear-search-btn');
+      const viewListBtn = document.getElementById('view-mode-list-btn');
+      const viewGridBtn = document.getElementById('view-mode-grid-btn');
+      const toolsContainer = document.getElementById('tools-container');
+      const counterNum = document.getElementById('tools-counter-num');
+      const noResultsState = document.getElementById('no-results-state');
+      const activeFilterBar = document.getElementById('active-filter-bar');
+      const filterTagText = document.getElementById('filter-tag-text');
+      const resetFilterBtn = document.getElementById('reset-filter-btn');
+      const clearAllFiltersBtn = document.getElementById('clear-all-filters-btn');
+
+      const toolCards = document.querySelectorAll('.tool-card');
+
+      // 1. Tab Switching
+      const tabActiveClasses = ['bg-white', 'dark:bg-[#0c1222]', 'text-[#060c2e]', 'dark:text-[#38bdf8]', 'font-bold', 'shadow-xs', 'border-slate-200/50', 'dark:border-white/5'];
+      const tabInactiveClasses = ['border-transparent', 'text-slate-600', 'dark:text-slate-400', 'font-medium'];
+
+      const switchTab = (tab) => {
+        activeTab = tab;
+        const formatCount = tabFormatBtn?.querySelector('.tab-format-count');
+        if (tab === 'category') {
+          tabCategoryBtn?.classList.remove(...tabInactiveClasses);
+          tabCategoryBtn?.classList.add(...tabActiveClasses);
+
+          tabFormatBtn?.classList.remove(...tabActiveClasses);
+          tabFormatBtn?.classList.add(...tabInactiveClasses);
+
+          formatCount?.classList.remove('text-[#060c2e]', 'dark:text-[#38bdf8]');
+          formatCount?.classList.add('text-slate-500', 'dark:text-slate-400');
+
+          tabCategoryContent?.classList.remove('hidden');
+          tabFormatContent?.classList.add('hidden');
+        } else {
+          tabFormatBtn?.classList.remove(...tabInactiveClasses);
+          tabFormatBtn?.classList.add(...tabActiveClasses);
+
+          tabCategoryBtn?.classList.remove(...tabActiveClasses);
+          tabCategoryBtn?.classList.add(...tabInactiveClasses);
+
+          formatCount?.classList.remove('text-slate-500', 'dark:text-slate-400');
+          formatCount?.classList.add('text-[#060c2e]', 'dark:text-[#38bdf8]');
+
+          tabFormatContent?.classList.remove('hidden');
+          tabCategoryContent?.classList.add('hidden');
+        }
+      };
+
+      tabCategoryBtn?.addEventListener('click', () => switchTab('category'));
+      tabFormatBtn?.addEventListener('click', () => switchTab('format'));
+
+      // 2. Filter Logic
+      const applyFilters = () => {
+        const query = (searchInput?.value || '').trim().toLowerCase();
+        let visibleCount = 0;
+
+        toolCards.forEach((card) => {
+          const cardCategory = card.getAttribute('data-category') || '';
+          const cardFormat = card.getAttribute('data-format') || '';
+          const cardTitle = card.getAttribute('data-title') || '';
+          const cardExcerpt = card.getAttribute('data-excerpt') || '';
+
+          // Category check
+          const matchCategory = activeCategory === 'all' || cardCategory === activeCategory;
+
+          // Format check
+          let matchFormat = true;
+          if (activeFormat !== 'all') {
+            if (activeFormat === 'excel') matchFormat = cardFormat.includes('excel');
+            else if (activeFormat === 'sheets') matchFormat = cardFormat.includes('sheets');
+            else if (activeFormat === 'web') matchFormat = cardFormat.includes('web');
+            else if (activeFormat === 'design') matchFormat = cardFormat.includes('figma') || cardFormat.includes('canva');
+            else if (activeFormat === 'doc') matchFormat = cardFormat.includes('pdf') || cardFormat.includes('form');
+          }
+
+          // Search check
+          const matchSearch =
+            !query ||
+            cardTitle.includes(query) ||
+            cardExcerpt.includes(query) ||
+            cardCategory.includes(query) ||
+            cardFormat.includes(query);
+
+          if (matchCategory && matchFormat && matchSearch) {
+            card.classList.remove('hidden');
+            visibleCount++;
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+
+        // Update counter
+        if (counterNum) counterNum.textContent = visibleCount.toString();
+
+        // No results state
+        if (visibleCount === 0) {
+          noResultsState?.classList.remove('hidden');
+        } else {
+          noResultsState?.classList.add('hidden');
+        }
+
+        // Active filter pill bar
+        if (activeCategory !== 'all' || activeFormat !== 'all' || query) {
+          activeFilterBar?.classList.remove('hidden');
+          activeFilterBar?.classList.add('flex');
+          let label = [];
+          if (activeCategory !== 'all') {
+            const btn = document.querySelector(`[data-filter-category="${activeCategory}"]`);
+            const nameSpan = btn?.querySelector('.category-name');
+            if (nameSpan) label.push(nameSpan.textContent.trim());
+          }
+          if (activeFormat !== 'all') {
+            const btn = document.querySelector(`[data-filter-format="${activeFormat}"]`);
+            const nameSpan = btn?.querySelector('.format-name');
+            if (nameSpan) label.push(nameSpan.textContent.trim());
+          }
+          if (query) label.push(`"${query}"`);
+          if (filterTagText) filterTagText.textContent = label.join(' + ');
+        } else {
+          activeFilterBar?.classList.add('hidden');
+          activeFilterBar?.classList.remove('flex');
+        }
+      };
+
+      // 3. Category Buttons Click
+      const catActiveClasses = ['bg-[#060c2e]', 'hover:bg-[#0a192f]', 'text-white', 'font-bold', 'shadow-xs'];
+      const catInactiveClasses = ['text-slate-700', 'dark:text-slate-300', 'hover:bg-slate-100', 'dark:hover:bg-white/5', 'font-medium'];
+
+      const categoryBtns = document.querySelectorAll('.category-btn');
+      categoryBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          categoryBtns.forEach((b) => {
+            b.classList.remove(...catActiveClasses);
+            b.classList.add(...catInactiveClasses);
+            const icon = b.querySelector('.category-icon');
+            const iconColor = b.getAttribute('data-icon-color');
+            if (icon && iconColor) {
+              icon.classList.remove('text-white');
+              icon.classList.add(iconColor);
+            }
+            const badge = b.querySelector('.category-count-badge');
+            badge?.classList.remove('bg-white/20', 'text-white');
+            badge?.classList.add('bg-slate-100', 'dark:bg-white/5', 'text-slate-500', 'dark:text-slate-400');
+          });
+
+          btn.classList.remove(...catInactiveClasses);
+          btn.classList.add(...catActiveClasses);
+          const icon = btn.querySelector('.category-icon');
+          const iconColor = btn.getAttribute('data-icon-color');
+          if (icon && iconColor) {
+            icon.classList.remove(iconColor);
+            icon.classList.add('text-white');
+          }
+          const badge = btn.querySelector('.category-count-badge');
+          badge?.classList.add('bg-white/20', 'text-white');
+          badge?.classList.remove('bg-slate-100', 'dark:bg-white/5', 'text-slate-500', 'dark:text-slate-400');
+
+          activeCategory = btn.getAttribute('data-filter-category') || 'all';
+          applyFilters();
+        });
+      });
+
+      // 4. Format Buttons Click
+      const formatBtns = document.querySelectorAll('.format-btn');
+      formatBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          formatBtns.forEach((b) => {
+            b.classList.remove(...catActiveClasses);
+            b.classList.add(...catInactiveClasses);
+            const icon = b.querySelector('.format-icon');
+            if (icon) {
+              icon.classList.remove('text-white');
+              icon.classList.add('text-[#060c2e]', 'dark:text-[#38bdf8]');
+            }
+            const badge = b.querySelector('.format-count-badge');
+            badge?.classList.remove('bg-white/20', 'text-white');
+            badge?.classList.add('bg-slate-100', 'dark:bg-white/5', 'text-slate-500', 'dark:text-slate-400');
+          });
+
+          btn.classList.remove(...catInactiveClasses);
+          btn.classList.add(...catActiveClasses);
+          const icon = btn.querySelector('.format-icon');
+          if (icon) {
+            icon.classList.remove('text-[#060c2e]', 'dark:text-[#38bdf8]');
+            icon.classList.add('text-white');
+          }
+          const badge = btn.querySelector('.format-count-badge');
+          badge?.classList.add('bg-white/20', 'text-white');
+          badge?.classList.remove('bg-slate-100', 'dark:bg-white/5', 'text-slate-500', 'dark:text-slate-400');
+
+          activeFormat = btn.getAttribute('data-filter-format') || 'all';
+          applyFilters();
+        });
+      });
+
+      // 5. Search Input Handling
+      searchInput?.addEventListener('input', () => {
+        if (searchInput.value.trim().length > 0) {
+          clearSearchBtn?.classList.remove('hidden');
+        } else {
+          clearSearchBtn?.classList.add('hidden');
+        }
+        applyFilters();
+      });
+
+      clearSearchBtn?.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        clearSearchBtn.classList.add('hidden');
+        applyFilters();
+        searchInput?.focus();
+      });
+
+      // 6. Reset Filter Button
+      const resetAll = () => {
+        activeCategory = 'all';
+        activeFormat = 'all';
+        if (searchInput) searchInput.value = '';
+        clearSearchBtn?.classList.add('hidden');
+
+        // Reset category buttons
+        const allCatBtn = document.querySelector('[data-filter-category="all"]');
+        if (allCatBtn) allCatBtn.click();
+        const allFmtBtn = document.querySelector('[data-filter-format="all"]');
+        if (allFmtBtn) allFmtBtn.click();
+
+        applyFilters();
+      };
+
+      resetFilterBtn?.addEventListener('click', resetAll);
+      clearAllFiltersBtn?.addEventListener('click', resetAll);
+
+      // 7. View Mode Switcher (List View vs Grid View)
+      const setViewMode = (mode) => {
+        activeViewMode = mode;
+        if (mode === 'grid') {
+          // Switch to Grid Mode
+          viewGridBtn?.classList.add('bg-white', 'dark:bg-[#0c1222]', 'text-[#060c2e]', 'dark:text-[#38bdf8]', 'shadow-xs');
+          viewGridBtn?.classList.remove('text-slate-500', 'dark:text-slate-400');
+          viewListBtn?.classList.remove('bg-white', 'dark:bg-[#0c1222]', 'text-[#060c2e]', 'dark:text-[#38bdf8]', 'shadow-xs');
+          viewListBtn?.classList.add('text-slate-500', 'dark:text-slate-400');
+
+          toolsContainer?.classList.remove('space-y-4');
+          toolsContainer?.classList.add('grid', 'grid-cols-1', 'sm:grid-cols-2', 'xl:grid-cols-3', 'gap-6');
+
+          toolCards.forEach((card) => {
+            card.classList.remove('md:flex-row', 'items-stretch', 'md:items-center');
+            card.classList.add('flex-col');
+            const imgLink = card.querySelector('a:first-child');
+            imgLink?.classList.remove('md:w-60', 'lg:w-64');
+            imgLink?.classList.add('w-full');
+            const rightCol = card.querySelector('.tool-card-right');
+            rightCol?.classList.remove('md:border-l', 'md:border-slate-100', 'md:dark:border-white/5', 'md:pl-5', 'md:flex-col', 'md:min-w-[130px]');
+            rightCol?.classList.add('w-full', 'pt-3', 'border-t', 'border-slate-100', 'dark:border-white/5', 'mt-2');
+          });
+        } else {
+          // Switch to List Mode
+          viewListBtn?.classList.add('bg-white', 'dark:bg-[#0c1222]', 'text-[#060c2e]', 'dark:text-[#38bdf8]', 'shadow-xs');
+          viewListBtn?.classList.remove('text-slate-500', 'dark:text-slate-400');
+          viewGridBtn?.classList.remove('bg-white', 'dark:bg-[#0c1222]', 'text-[#060c2e]', 'dark:text-[#38bdf8]', 'shadow-xs');
+          viewGridBtn?.classList.add('text-slate-500', 'dark:text-slate-400');
+
+          toolsContainer?.classList.add('space-y-4');
+          toolsContainer?.classList.remove('grid', 'grid-cols-1', 'sm:grid-cols-2', 'xl:grid-cols-3', 'gap-6');
+
+          toolCards.forEach((card) => {
+            card.classList.add('md:flex-row', 'items-stretch', 'md:items-center');
+            card.classList.remove('flex-col');
+            const imgLink = card.querySelector('a:first-child');
+            imgLink?.classList.add('md:w-60', 'lg:w-64');
+            imgLink?.classList.remove('w-full');
+            const rightCol = card.querySelector('.tool-card-right');
+            rightCol?.classList.add('md:border-l', 'md:border-slate-100', 'md:dark:border-white/5', 'md:pl-5', 'md:flex-col', 'md:min-w-[130px]');
+            rightCol?.classList.remove('w-full', 'pt-3', 'border-t', 'border-slate-100', 'dark:border-white/5', 'mt-2');
+          });
+        }
+      };
+
+      viewListBtn?.addEventListener('click', () => setViewMode('list'));
+      viewGridBtn?.addEventListener('click', () => setViewMode('grid'));
+    };
+
+    // Execute on initial load and Astro page transitions
+    setupToolsPage();
+    document.addEventListener('astro:page-load', setupToolsPage);
+  </script>
+</BaseLayout>

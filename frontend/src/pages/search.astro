@@ -1,0 +1,260 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { performGlobalSearch } from '../lib/search';
+import {
+  Search as SearchIcon,
+  Laptop,
+  Briefcase,
+  FileText,
+  Wrench,
+  ArrowRight,
+  ExternalLink,
+  Sparkles,
+  Layers,
+  Calendar,
+} from 'lucide-react';
+
+export const prerender = false;
+
+const q = Astro.url.searchParams.get('q') || '';
+const searchData = await performGlobalSearch(q);
+
+const popularKeywords = [
+  'Next.js',
+  'Headless WordPress',
+  'กฟผ.',
+  'เว็บองค์กร',
+  'งบประมาณ',
+  'คลาวด์',
+  'Astro',
+  'KPI',
+];
+
+const categoryIcons: Record<string, any> = {
+  services: Laptop,
+  projects: Briefcase,
+  articles: FileText,
+  tools: Wrench,
+};
+
+const categoryBadgeStyles: Record<string, string> = {
+  services: 'bg-[#162d59]/10 dark:bg-[#38bdf8]/15 text-[#162d59] dark:text-[#38bdf8] border-[#162d59]/20',
+  projects: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20',
+  articles: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20',
+  tools: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
+};
+---
+
+<BaseLayout
+  title={q ? `ผลการค้นหา: "${q}" — Offriend` : 'ค้นหาข้อมูลและบริการ — Offriend'}
+  description="ค้นหาข้อมูลบริการพัฒนาซอฟต์แวร์ ผลงานโครงการ คลังบทความ และเครื่องมือช่วยทำงานทั้งหมดของ Offriend"
+>
+  <!-- Page Header -->
+  <PageHeader
+    breadcrumbs={[
+      { label: 'หน้าแรก', href: '/' },
+      { label: 'ค้นหา' },
+    ]}
+    kicker="SEARCH CENTER"
+    title="ค้นหาข้อมูลทุกบริการ"
+    titleGradient="และเครื่องมือดิจิทัล"
+    description="ค้นหาข้อมูลครบวงจร ทั้งผลงานโครงการที่ผ่านมา บริการพัฒนาซอฟต์แวร์ คลังบทความความรู้ และเครื่องมือช่วยคนออฟฟิศ"
+  />
+
+  <div class="py-10 sm:py-14 bg-white dark:bg-[#070b14] transition-colors">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      
+      <!-- Search Input Box Form -->
+      <form action="/search" method="get" class="relative">
+        <div class="relative flex items-center">
+          <SearchIcon className="absolute left-4 w-5 h-5 text-slate-400" />
+          <input
+            type="text"
+            name="q"
+            value={q}
+            placeholder="ค้นหาผลงาน, บริการ, บทความ, หรือเครื่องมือทำงาน..."
+            autocomplete="off"
+            autofocus
+            class="w-full pl-12 pr-28 sm:pr-32 py-4 rounded-2xl bg-slate-50 dark:bg-[#0c1222] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 text-sm sm:text-base font-medium shadow-inner focus:outline-none focus:ring-2 focus:ring-[#162d59] dark:focus:ring-[#38bdf8] transition-all"
+          />
+          <button
+            type="submit"
+            class="absolute right-2.5 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-[#162d59] hover:bg-[#0a192f] dark:bg-[#38bdf8] dark:hover:bg-[#0284c7] text-white dark:text-slate-950 transition-colors shadow-xs cursor-pointer"
+          >
+            ค้นหา
+          </button>
+        </div>
+      </form>
+
+      <!-- Popular Keywords Suggestion -->
+      <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <span class="font-bold">คำค้นหายอดนิยม:</span>
+        {
+          popularKeywords.map((keyword) => (
+            <a
+              href={`/search?q=${encodeURIComponent(keyword)}`}
+              class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-[#162d59]/10 dark:hover:bg-[#38bdf8]/20 hover:text-[#162d59] dark:hover:text-[#38bdf8] transition-colors"
+            >
+              {keyword}
+            </a>
+          ))
+        }
+      </div>
+
+      {q && (
+        <div class="space-y-6 pt-4 border-t border-slate-200 dark:border-white/10">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+                ผลการค้นหาสำหรับ <span class="text-[#162d59] dark:text-[#38bdf8] font-black">"{q}"</span>
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                พบข้อมูลทั้งหมด {searchData.total} รายการ ใน 4 หมวดหมู่
+              </p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 pb-2">
+            <button
+              type="button"
+              class="search-filter-btn active px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer bg-[#162d59] text-white shadow-xs"
+              data-cat="all"
+            >
+              ทั้งหมด ({searchData.counts.all})
+            </button>
+            <button
+              type="button"
+              class="search-filter-btn px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10"
+              data-cat="services"
+            >
+              บริการ ({searchData.counts.services})
+            </button>
+            <button
+              type="button"
+              class="search-filter-btn px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10"
+              data-cat="projects"
+            >
+              ผลงาน ({searchData.counts.projects})
+            </button>
+            <button
+              type="button"
+              class="search-filter-btn px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10"
+              data-cat="articles"
+            >
+              บทความ ({searchData.counts.articles})
+            </button>
+            <button
+              type="button"
+              class="search-filter-btn px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10"
+              data-cat="tools"
+            >
+              เครื่องมือ ({searchData.counts.tools})
+            </button>
+          </div>
+
+          {searchData.total > 0 ? (
+            <div id="search-results-list" class="space-y-4">
+              {searchData.results.map((item) => {
+                const IconComponent = categoryIcons[item.category] || Sparkles;
+                const badgeStyle = categoryBadgeStyles[item.category] || '';
+
+                return (
+                  <article
+                    class="search-item group p-5 sm:p-6 rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#0c1222] shadow-xs hover:shadow-lg hover:border-[#162d59]/40 dark:hover:border-[#38bdf8]/40 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    data-cat={item.category}
+                  >
+                    <div class="space-y-2 flex-grow pr-2">
+                      <div class="flex items-center gap-2">
+                        <span class={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold border ${badgeStyle}`}>
+                          <IconComponent className="w-3 h-3" />
+                          <span>{item.categoryLabel}</span>
+                        </span>
+
+                        {item.badge && item.badge !== item.categoryLabel && (
+                          <span class="text-[11px] font-medium text-slate-400">
+                            · {item.badge}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#162d59] dark:group-hover:text-[#38bdf8] transition-colors">
+                        <a href={item.url} class="focus:outline-none">
+                          {item.title}
+                        </a>
+                      </h3>
+
+                      {item.subtitle && (
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                          {item.subtitle}
+                        </p>
+                      )}
+
+                      <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal line-clamp-2">
+                        {item.description}
+                      </p>
+                    </div>
+
+                    <div class="shrink-0 pt-2 sm:pt-0">
+                      <a
+                        href={item.url}
+                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-white/5 hover:bg-[#162d59] hover:text-white dark:hover:bg-[#38bdf8] dark:hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 transition-colors"
+                      >
+                        <span>เปิดดูข้อมูล</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div class="p-12 text-center rounded-3xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-[#0c1222] space-y-4">
+              <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-200 dark:bg-white/10 flex items-center justify-center text-slate-400">
+                <SearchIcon className="w-7 h-7" />
+              </div>
+              <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">
+                ไม่พบผลการค้นหาสำหรับ "{q}"
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                กรุณาลองตรวจสอบตัวสะกด หรือใช้คำค้นหาทั่วไป เช่น Next.js, Headless CMS, อบรม, หรือชื่อเครื่องมือ
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  function setupSearchFilter() {
+    const filterBtns = document.querySelectorAll('.search-filter-btn');
+    const items = document.querySelectorAll('.search-item');
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const cat = btn.getAttribute('data-cat');
+
+        filterBtns.forEach((b) => {
+          b.classList.remove('active', 'bg-[#162d59]', 'text-white', 'shadow-xs');
+          b.classList.add('bg-slate-100', 'dark:bg-white/5', 'text-slate-700', 'dark:text-slate-300');
+        });
+        btn.classList.add('active', 'bg-[#162d59]', 'text-white', 'shadow-xs');
+        btn.classList.remove('bg-slate-100', 'dark:bg-white/5', 'text-slate-700', 'dark:text-slate-300');
+
+        items.forEach((item) => {
+          const itemCat = item.getAttribute('data-cat');
+          if (cat === 'all' || itemCat === cat) {
+            (item as HTMLElement).style.display = 'flex';
+          } else {
+            (item as HTMLElement).style.display = 'none';
+          }
+        });
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', setupSearchFilter);
+</script>
