@@ -32,6 +32,34 @@ const defaultImages: Record<string, string> = {
 };
 
 const meta = rawProject.project_meta || {};
+
+// Check if gallery is configured via WordPress
+const wpGallery = Array.isArray(meta.gallery) && meta.gallery.length > 0
+  ? meta.gallery.filter((item) => item && item.url)
+  : null;
+
+// Fallback gallery for mock/initial demo data
+const fallbackGallery = [
+  {
+    url: rawProject.featured_image_url || defaultImages[rawProject.slug] || '/images/contact-seminar.webp',
+    caption: rawProject.title?.rendered || '',
+  },
+  {
+    url: '/images/solutions/web-development.webp',
+    caption: 'ช่วงลงมือทำ Hands-on Workshop และการพัฒนาจริง',
+  },
+  {
+    url: '/images/solutions/enterprise-consult.webp',
+    caption: 'การอภิปรายและตอบข้อซักถามเชิงลึกเกี่ยวกับสถาปัตยกรรมระบบ',
+  },
+  {
+    url: '/images/solutions/office-tools.webp',
+    caption: 'การทดสอบประสิทธิภาพและ Performance Benchmarking',
+  },
+];
+
+const galleryItems = meta.has_custom_gallery ? (wpGallery || []) : (wpGallery || fallbackGallery);
+
 const project = {
   slug: rawProject.slug,
   title: rawProject.title?.rendered || '',
@@ -49,24 +77,7 @@ const project = {
     topics: meta.tech_stack || [],
     outcomes: meta.metrics || [],
   },
-  gallery: [
-    {
-      url: rawProject.featured_image_url || defaultImages[rawProject.slug] || '/images/contact-seminar.webp',
-      caption: rawProject.title?.rendered || '',
-    },
-    {
-      url: '/images/solutions/web-development.webp',
-      caption: 'ช่วงลงมือทำ Hands-on Workshop และการพัฒนาจริง',
-    },
-    {
-      url: '/images/solutions/enterprise-consult.webp',
-      caption: 'การอภิปรายและตอบข้อซักถามเชิงลึกเกี่ยวกับสถาปัตยกรรมระบบ',
-    },
-    {
-      url: '/images/solutions/office-tools.webp',
-      caption: 'การทดสอบประสิทธิภาพและ Performance Benchmarking',
-    },
-  ],
+  gallery: galleryItems,
   techStack: meta.tech_stack && meta.tech_stack.length > 0 ? meta.tech_stack : ['Next.js', 'React', 'TypeScript'],
 };
 
@@ -170,7 +181,7 @@ const pageTitle = `${project.title} — ผลงานและโครงก�
           <!-- รายละเอียดงาน (Matching Screenshot) -->
           <div class="space-y-3 pt-2">
             <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-              <span class="w-1.5 h-6 bg-[#00736e] rounded-full inline-block shrink-0"></span>
+              <span class="w-1.5 h-6 bg-[#162d59] dark:bg-[#38bdf8] rounded-full inline-block shrink-0"></span>
               <span>รายละเอียดงาน</span>
             </h2>
             <p class="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed font-normal">
@@ -179,39 +190,50 @@ const pageTitle = `${project.title} — ผลงานและโครงก�
           </div>
 
           <!-- ภาพบรรยากาศ (Matching Screenshot) -->
-          <div class="space-y-4 pt-4">
-            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-              <span class="w-1.5 h-6 bg-[#00736e] rounded-full inline-block shrink-0"></span>
-              <span>ภาพบรรยากาศ</span>
-            </h2>
+          {
+            project.gallery.length > 0 && (
+              <div class="space-y-4 pt-4">
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+                  <span class="w-1.5 h-6 bg-[#162d59] dark:bg-[#38bdf8] rounded-full inline-block shrink-0"></span>
+                  <span>ภาพบรรยากาศ</span>
+                </h2>
 
-            <!-- Gallery Grid (2 columns matching screenshot) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {
-                project.gallery.map((item, index) => (
-                  <div
-                    class="lightbox-trigger group relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200/80 dark:border-white/10 bg-slate-100 dark:bg-slate-800 cursor-zoom-in shadow-xs hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
-                    data-img-src={item.url}
-                    data-caption={item.caption}
-                    data-index={index}
-                  >
-                    <img
-                      {...imageProps(item.url, null, { width: 1600, height: 1200 })}
-                      alt={item.caption}
-                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                    <div class="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3">
-                      <span class="p-2 rounded-full bg-black/60 text-white backdrop-blur-xs">
-                        <Maximize2 className="w-4 h-4" />
-                      </span>
-                    </div>
-                  </div>
-                ))
-              }
-            </div>
-          </div>
+                <!-- Natural Scale Masonry Gallery (No locked aspect ratio, preserves natural image scale) -->
+                <div class="columns-1 sm:columns-2 gap-4 [column-fill:_balance]">
+                  {
+                    project.gallery.map((item, index) => (
+                      <figure class="break-inside-avoid mb-4 group relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-white/10 bg-slate-100 dark:bg-slate-800 shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                        <div
+                          class="lightbox-trigger cursor-zoom-in relative block"
+                          data-img-src={item.url}
+                          data-caption={item.caption || ''}
+                          data-index={index}
+                        >
+                          <img
+                            src={item.url}
+                            alt={item.caption || project.title}
+                            class="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.02]"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                          <div class="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3">
+                            <span class="p-2.5 rounded-full bg-black/60 text-white backdrop-blur-xs shadow-md">
+                              <Maximize2 className="w-4 h-4" />
+                            </span>
+                          </div>
+                        </div>
+                        {item.caption && (
+                          <figcaption class="p-3 bg-white/95 dark:bg-[#0c1222]/95 border-t border-slate-100 dark:border-white/5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                            {item.caption}
+                          </figcaption>
+                        )}
+                      </figure>
+                    ))
+                  }
+                </div>
+              </div>
+            )
+          }
         </main>
 
         <!-- RIGHT SIDEBAR (Matching Reference Image) (4 Cols) -->

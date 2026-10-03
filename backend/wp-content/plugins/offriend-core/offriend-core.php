@@ -841,6 +841,11 @@ class Offriend_Headless_Core {
         $tech_stack   = get_post_meta( $post->ID, '_offriend_project_tech_stack', true );
         $year         = get_post_meta( $post->ID, '_offriend_project_year', true );
         $metrics      = get_post_meta( $post->ID, '_offriend_project_metrics', true );
+        $gallery_raw  = get_post_meta( $post->ID, '_offriend_project_gallery', true );
+        $gallery_items = $gallery_raw ? json_decode( $gallery_raw, true ) : array();
+        if ( ! is_array( $gallery_items ) ) {
+            $gallery_items = array();
+        }
         ?>
         <table class="form-table" style="width: 100%;">
             <tr>
@@ -863,7 +868,235 @@ class Offriend_Headless_Core {
                 <th><label for="project_metrics">ผลลัพธ์เชิงตัวเลข / ไฮไลท์ (1 บรรทัดต่อ 1 ข้อ)</label></th>
                 <td><textarea id="project_metrics" name="project_metrics" rows="3" class="large-text" placeholder="โหลดเร็วขึ้น 300%&#10;รองรับ 50,000 Concurrent Users"><?php echo esc_textarea( $metrics ); ?></textarea></td>
             </tr>
+            <tr>
+                <th><label>ภาพบรรยากาศโครงการ (Gallery)</label></th>
+                <td>
+                    <p class="description" style="margin-bottom: 12px; font-size: 13px;">
+                        สามารถเพิ่ม ลบ แก้ไขคำอธิบาย และจัดเรียงภาพบรรยากาศโครงการได้ตามต้องการ โดยในหน้าเว็บจะแสดงผลตามสัดส่วนภาพจริง (Scale เดิม ไม่โดนตัดขอบ)
+                    </p>
+                    <input type="hidden" id="offriend_project_gallery_data" name="project_gallery" value="<?php echo esc_attr( wp_json_encode( $gallery_items ) ); ?>" />
+                    
+                    <div id="project_gallery_cards_wrap" style="display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; min-height: 40px; align-items: flex-start;">
+                        <!-- Cards dynamically rendered here -->
+                    </div>
+
+                    <button type="button" class="button button-secondary" id="btn_add_project_gallery" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; padding: 4px 12px;">
+                        <span class="dashicons dashicons-format-gallery" style="margin-top: 2px;"></span> เพิ่ม / อัปโหลดภาพบรรยากาศ
+                    </button>
+                </td>
+            </tr>
         </table>
+
+        <style>
+            .offriend-gallery-card {
+                width: 170px;
+                border: 1px solid #ccd0d4;
+                border-radius: 8px;
+                background: #fff;
+                padding: 8px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                position: relative;
+                transition: transform 0.15s ease, box-shadow 0.15s ease;
+            }
+            .offriend-gallery-card:hover {
+                box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+            }
+            .offriend-gallery-thumb-wrap {
+                width: 100%;
+                height: 110px;
+                background: #f0f0f1;
+                border-radius: 6px;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .offriend-gallery-thumb-wrap img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+            .offriend-gallery-caption-input {
+                width: 100%;
+                font-size: 11px;
+                padding: 4px 6px;
+                border: 1px solid #dcdcde;
+                border-radius: 4px;
+            }
+            .offriend-gallery-actions {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 4px;
+                margin-top: 2px;
+            }
+            .offriend-gallery-actions button {
+                padding: 2px 6px;
+                font-size: 11px;
+                line-height: 1.4;
+                cursor: pointer;
+            }
+        </style>
+
+        <script>
+        jQuery(document).ready(function($) {
+            var galleryInput = $('#offriend_project_gallery_data');
+            var galleryContainer = $('#project_gallery_cards_wrap');
+            var rawData = galleryInput.val();
+            var galleryData = [];
+
+            try {
+                if (rawData) {
+                    galleryData = JSON.parse(rawData);
+                }
+            } catch (e) {
+                galleryData = [];
+            }
+
+            if (!Array.isArray(galleryData)) {
+                galleryData = [];
+            }
+
+            function syncGalleryData() {
+                var currentItems = [];
+                galleryContainer.find('.offriend-gallery-card').each(function() {
+                    var card = $(this);
+                    var url = card.data('url');
+                    var caption = card.find('.offriend-gallery-caption-input').val();
+                    if (url) {
+                        currentItems.push({
+                            url: url,
+                            caption: caption || ''
+                        });
+                    }
+                });
+                galleryInput.val(JSON.stringify(currentItems));
+            }
+
+            function renderGalleryCards() {
+                galleryContainer.empty();
+                if (galleryData.length === 0) {
+                    galleryContainer.html('<p style="color: #646970; font-size: 12px; margin: 6px 0;">ยังไม่มีภาพบรรยากาศ สามารถคลิกปุ่มด้านล่างเพื่อเพิ่มรูปภาพ</p>');
+                    return;
+                }
+
+                galleryData.forEach(function(item, index) {
+                    var safeUrl = $('<div>').text(item.url || '').html();
+                    var safeCaption = $('<div>').text(item.caption || '').html();
+
+                    var cardHtml = $(
+                        '<div class="offriend-gallery-card" data-index="' + index + '" data-url="' + safeUrl + '">' +
+                            '<div class="offriend-gallery-thumb-wrap">' +
+                                '<img src="' + safeUrl + '" alt="preview" />' +
+                            '</div>' +
+                            '<input type="text" class="offriend-gallery-caption-input" placeholder="คำอธิบายภาพ..." value="' + safeCaption + '" />' +
+                            '<div class="offriend-gallery-actions">' +
+                                '<button type="button" class="button btn-move-left" title="เลื่อนไปซ้าย">◀</button>' +
+                                '<button type="button" class="button btn-move-right" title="เลื่อนไปขวา">▶</button>' +
+                                '<button type="button" class="button button-link-delete btn-delete-image" style="color: #b32d2e; font-size: 11px;">ลบ</button>' +
+                            '</div>' +
+                        '</div>'
+                    );
+
+                    galleryContainer.append(cardHtml);
+                });
+            }
+
+            // Initial render
+            renderGalleryCards();
+
+            // Caption changed
+            galleryContainer.on('input change', '.offriend-gallery-caption-input', function() {
+                syncGalleryData();
+            });
+
+            // Delete item
+            galleryContainer.on('click', '.btn-delete-image', function(e) {
+                e.preventDefault();
+                $(this).closest('.offriend-gallery-card').remove();
+                syncGalleryData();
+                if (galleryContainer.find('.offriend-gallery-card').length === 0) {
+                    galleryData = [];
+                    renderGalleryCards();
+                }
+            });
+
+            // Move Left
+            galleryContainer.on('click', '.btn-move-left', function(e) {
+                e.preventDefault();
+                var card = $(this).closest('.offriend-gallery-card');
+                var prev = card.prev('.offriend-gallery-card');
+                if (prev.length) {
+                    card.insertBefore(prev);
+                    syncGalleryData();
+                }
+            });
+
+            // Move Right
+            galleryContainer.on('click', '.btn-move-right', function(e) {
+                e.preventDefault();
+                var card = $(this).closest('.offriend-gallery-card');
+                var next = card.next('.offriend-gallery-card');
+                if (next.length) {
+                    card.insertAfter(next);
+                    syncGalleryData();
+                }
+            });
+
+            // Add images via WP Media
+            $('#btn_add_project_gallery').on('click', function(e) {
+                e.preventDefault();
+
+                var mediaFrame = wp.media({
+                    title: 'เลือกภาพบรรยากาศโครงการ',
+                    button: { text: 'เพิ่มภาพบรรยากาศ' },
+                    multiple: true,
+                    library: { type: 'image' }
+                });
+
+                mediaFrame.on('select', function() {
+                    var selection = mediaFrame.state().get('selection');
+                    // Remove empty message if any
+                    if (galleryContainer.find('.offriend-gallery-card').length === 0) {
+                        galleryContainer.empty();
+                    }
+
+                    selection.map(function(attachment) {
+                        var item = attachment.toJSON();
+                        var imageUrl = item.url;
+                        var caption = item.caption || item.title || '';
+
+                        var safeUrl = $('<div>').text(imageUrl).html();
+                        var safeCaption = $('<div>').text(caption).html();
+
+                        var cardHtml = $(
+                            '<div class="offriend-gallery-card" data-url="' + safeUrl + '">' +
+                                '<div class="offriend-gallery-thumb-wrap">' +
+                                    '<img src="' + safeUrl + '" alt="preview" />' +
+                                '</div>' +
+                                '<input type="text" class="offriend-gallery-caption-input" placeholder="คำอธิบายภาพ..." value="' + safeCaption + '" />' +
+                                '<div class="offriend-gallery-actions">' +
+                                    '<button type="button" class="button btn-move-left" title="เลื่อนไปซ้าย">◀</button>' +
+                                    '<button type="button" class="button btn-move-right" title="เลื่อนไปขวา">▶</button>' +
+                                    '<button type="button" class="button button-link-delete btn-delete-image" style="color: #b32d2e; font-size: 11px;">ลบ</button>' +
+                                '</div>' +
+                            '</div>'
+                        );
+
+                        galleryContainer.append(cardHtml);
+                    });
+
+                    syncGalleryData();
+                });
+
+                mediaFrame.open();
+            });
+        });
+        </script>
         <?php
     }
 
@@ -1104,6 +1337,24 @@ class Offriend_Headless_Core {
             if ( isset( $_POST['project_year'] ) ) update_post_meta( $post_id, '_offriend_project_year', sanitize_text_field( $_POST['project_year'] ) );
             if ( isset( $_POST['project_tech_stack'] ) ) update_post_meta( $post_id, '_offriend_project_tech_stack', sanitize_text_field( $_POST['project_tech_stack'] ) );
             if ( isset( $_POST['project_metrics'] ) ) update_post_meta( $post_id, '_offriend_project_metrics', sanitize_textarea_field( $_POST['project_metrics'] ) );
+            if ( isset( $_POST['project_gallery'] ) ) {
+                $gallery_raw = wp_unslash( $_POST['project_gallery'] );
+                $gallery_data = json_decode( $gallery_raw, true );
+                if ( is_array( $gallery_data ) ) {
+                    $sanitized_gallery = array();
+                    foreach ( $gallery_data as $item ) {
+                        if ( ! empty( $item['url'] ) ) {
+                            $sanitized_gallery[] = array(
+                                'url'     => esc_url_raw( $item['url'] ),
+                                'caption' => isset( $item['caption'] ) ? sanitize_text_field( $item['caption'] ) : '',
+                            );
+                        }
+                    }
+                    update_post_meta( $post_id, '_offriend_project_gallery', wp_json_encode( $sanitized_gallery ) );
+                } else {
+                    delete_post_meta( $post_id, '_offriend_project_gallery' );
+                }
+            }
         }
 
         // Services
@@ -1222,12 +1473,24 @@ class Offriend_Headless_Core {
                 $id = $post_arr['id'];
                 $tech_str = get_post_meta( $id, '_offriend_project_tech_stack', true );
                 $metrics_str = get_post_meta( $id, '_offriend_project_metrics', true );
+                $gallery_raw = get_post_meta( $id, '_offriend_project_gallery', true );
+                $gallery = array();
+                $has_custom_gallery = false;
+                if ( $gallery_raw !== '' && $gallery_raw !== false ) {
+                    $has_custom_gallery = true;
+                    $decoded = json_decode( $gallery_raw, true );
+                    if ( is_array( $decoded ) ) {
+                        $gallery = $decoded;
+                    }
+                }
                 return array(
-                    'client'       => get_post_meta( $id, '_offriend_project_client', true ) ?: '',
-                    'category_tag' => get_post_meta( $id, '_offriend_project_category_tag', true ) ?: '',
-                    'year'         => get_post_meta( $id, '_offriend_project_year', true ) ?: '',
-                    'tech_stack'   => $tech_str ? array_map( 'trim', explode( ',', $tech_str ) ) : array(),
-                    'metrics'      => $metrics_str ? array_filter( array_map( 'trim', explode( "\n", $metrics_str ) ) ) : array(),
+                    'client'             => get_post_meta( $id, '_offriend_project_client', true ) ?: '',
+                    'category_tag'       => get_post_meta( $id, '_offriend_project_category_tag', true ) ?: '',
+                    'year'               => get_post_meta( $id, '_offriend_project_year', true ) ?: '',
+                    'tech_stack'         => $tech_str ? array_map( 'trim', explode( ',', $tech_str ) ) : array(),
+                    'metrics'            => $metrics_str ? array_filter( array_map( 'trim', explode( "\n", $metrics_str ) ) ) : array(),
+                    'gallery'            => $gallery,
+                    'has_custom_gallery' => $has_custom_gallery,
                 );
             },
         ) );

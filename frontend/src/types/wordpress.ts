@@ -265,6 +265,11 @@ export interface WPProject {
     year?: string;
     tech_stack?: string[];
     metrics?: string[];
+    gallery?: Array<{
+      url: string;
+      caption?: string;
+    }>;
+    has_custom_gallery?: boolean;
   };
   _embedded?: {
     'wp:featuredmedia'?: WPMediaItem[];
