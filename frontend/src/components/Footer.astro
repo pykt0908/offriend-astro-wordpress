@@ -1,12 +1,14 @@
 ---
 import { MapPin, Mail, Phone, Clock } from "lucide-react";
 import { getSiteSettings, getServicesFromWP } from "../lib/wordpress";
+import { imageProps } from "../lib/image";
 
 const currentYear = new Date().getFullYear();
 const [siteSettings, wpServices] = await Promise.all([
   getSiteSettings(),
   getServicesFromWP(),
 ]);
+const footerLogo = imageProps("/images/logos/no-bg/1.5TP.webp", null, { width: 240, height: 168 });
 ---
 
 <footer
@@ -34,10 +36,11 @@ const [siteSettings, wpServices] = await Promise.all([
           class="flex items-center gap-3 focus:outline-none select-none"
         >
           <img
-            src="/images/logos/no-bg/1.5TP.png"
+            {...footerLogo}
             alt={siteSettings.company_name_th}
             class="h-10 w-auto object-contain drop-shadow-[0_0_12px_rgba(41,168,216,0.3)]"
             loading="lazy"
+            decoding="async"
           />
           <div class="flex flex-col justify-center">
             <span
@@ -54,7 +57,7 @@ const [siteSettings, wpServices] = await Promise.all([
         </a>
 
         <p
-          class="text-slate-400 text-xs sm:text-sm leading-relaxed font-normal"
+          class="text-slate-300 text-xs sm:text-sm leading-relaxed font-normal"
         >
           {siteSettings.company_desc}
         </p>
@@ -65,7 +68,7 @@ const [siteSettings, wpServices] = await Promise.all([
             href={siteSettings.line_url}
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#06c755] hover:bg-[#05b34c] text-white shadow-xs transition-colors"
+            class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#047a3a] hover:bg-[#036530] text-white shadow-xs transition-colors"
           >
             <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
               <path
@@ -79,12 +82,12 @@ const [siteSettings, wpServices] = await Promise.all([
 
       <!-- Col 2: Services & Solutions (3 cols on lg) -->
       <div class="lg:col-span-3 space-y-3.5">
-        <h4
+        <h2
           class="text-white text-xs font-bold uppercase tracking-wider border-l-2 border-[#38bdf8] pl-2.5"
         >
           บริการและโซลูชัน
-        </h4>
-        <ul class="space-y-2.5 text-xs sm:text-sm text-slate-400 font-normal">
+        </h2>
+        <ul class="space-y-2.5 text-xs sm:text-sm text-slate-300 font-normal">
           {
             wpServices.map((service) => (
               <li>
@@ -110,12 +113,12 @@ const [siteSettings, wpServices] = await Promise.all([
 
       <!-- Col 3: Company & Governance (2 cols on lg) -->
       <div class="lg:col-span-2 space-y-3.5">
-        <h4
+        <h2
           class="text-white text-xs font-bold uppercase tracking-wider border-l-2 border-[#38bdf8] pl-2.5"
         >
           เกี่ยวกับองค์กร
-        </h4>
-        <ul class="space-y-2.5 text-xs sm:text-sm text-slate-400 font-normal">
+        </h2>
+        <ul class="space-y-2.5 text-xs sm:text-sm text-slate-300 font-normal">
           <li>
             <a
               href="/team"
@@ -161,12 +164,12 @@ const [siteSettings, wpServices] = await Promise.all([
 
       <!-- Col 4: Corporate Contact Details (3 cols on lg) -->
       <div class="lg:col-span-3 space-y-3.5">
-        <h4
+        <h2
           class="text-white text-xs font-bold uppercase tracking-wider border-l-2 border-[#38bdf8] pl-2.5"
         >
           ติดต่อ
-        </h4>
-        <ul class="space-y-3 text-xs sm:text-sm text-slate-400 font-normal">
+        </h2>
+        <ul class="space-y-3 text-xs sm:text-sm text-slate-300 font-normal">
           <li class="flex items-start gap-2.5">
             <MapPin className="w-4 h-4 text-[#38bdf8] flex-shrink-0 mt-0.5" />
             <span class="leading-relaxed">
@@ -191,8 +194,8 @@ const [siteSettings, wpServices] = await Promise.all([
               (+66) {siteSettings.contact_phone}
             </a>
           </li>
-          <li class="flex items-center gap-2.5 text-xs text-slate-500">
-            <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+          <li class="flex items-center gap-2.5 text-xs text-slate-300">
+            <Clock className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
             <span>เวลาทำการ: {siteSettings.working_hours}</span>
           </li>
         </ul>
@@ -201,7 +204,7 @@ const [siteSettings, wpServices] = await Promise.all([
 
     <!-- Corporate Bottom Bar: Copyright & Compliance -->
     <div
-      class="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400"
+      class="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-300"
     >
       <div
         class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left"
@@ -224,7 +227,7 @@ const [siteSettings, wpServices] = await Promise.all([
           <button
             type="button"
             id="footer-open-cookie-settings"
-            class="hover:text-white transition-colors cursor-pointer text-slate-400 underline underline-offset-2"
+            class="hover:text-white transition-colors cursor-pointer text-slate-300 underline underline-offset-2"
           >
             ตั้งค่าคุกกี้
           </button>

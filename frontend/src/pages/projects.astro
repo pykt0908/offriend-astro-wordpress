@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import { getProjectsFromWP } from '../lib/wordpress';
+import { imageProps } from '../lib/image';
 import {
   Building2,
   Calendar,
@@ -16,10 +17,10 @@ export const prerender = false;
 const wpProjects = await getProjectsFromWP();
 
 const defaultProjectImages: Record<string, string> = {
-  'nextjs-advanced-egat': '/images/contact-seminar.jpg',
-  'workshop-fullstack-nextjs-bts': '/images/solutions/web-development.jpg',
-  'corporate-cloud-devops-mea': '/images/solutions/enterprise-consult.jpg',
-  'headless-wp-astro-enterprise-nstda': '/images/solutions/office-tools.jpg',
+  'nextjs-advanced-egat': '/images/contact-seminar.webp',
+  'workshop-fullstack-nextjs-bts': '/images/solutions/web-development.webp',
+  'corporate-cloud-devops-mea': '/images/solutions/enterprise-consult.webp',
+  'headless-wp-astro-enterprise-nstda': '/images/solutions/office-tools.webp',
 };
 
 const projectsData = wpProjects.map((p) => {
@@ -32,7 +33,7 @@ const projectsData = wpProjects.map((p) => {
     location: 'กรุงเทพมหานคร',
     date: meta.year || '2569',
     subtitle: p.title?.rendered || '',
-    image: p.featured_image_url || defaultProjectImages[p.slug] || '/images/contact-seminar.jpg',
+    image: p.featured_image_url || defaultProjectImages[p.slug] || '/images/contact-seminar.webp',
     imageAlt: p.title?.rendered || '',
     excerpt: p.excerpt?.rendered?.replace(/<[^>]*>?/gm, '').trim() || p.content?.rendered?.replace(/<[^>]*>?/gm, '').trim() || '',
     techStack: meta.tech_stack && meta.tech_stack.length > 0 ? meta.tech_stack : ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'],
@@ -108,10 +109,11 @@ const projectCategories = ['ทั้งหมด', ...dynamicCategories];
                 class="block relative aspect-[16/10] w-full overflow-hidden bg-slate-100 dark:bg-slate-800"
               >
                 <img
-                  src={project.image}
+                  {...imageProps(project.image, null, { width: 1600, height: 1000 })}
                   alt={project.imageAlt}
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
 

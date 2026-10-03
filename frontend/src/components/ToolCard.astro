@@ -1,5 +1,6 @@
 ﻿---
 import type { WPTool } from '../types/wordpress';
+import { imageProps } from '../lib/image';
 import { ArrowRight, Download, FileSpreadsheet, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface Props {
@@ -12,7 +13,12 @@ const { tool } = Astro.props;
 const featuredImage =
   tool.featured_image_url ||
   tool._embedded?.['wp:featuredmedia']?.[0]?.source_url ||
-  '/images/tools/budget-calculator.jpg';
+  '/images/tools/budget-calculator.webp';
+const picture = imageProps(
+  featuredImage,
+  tool._embedded?.['wp:featuredmedia']?.[0],
+  { width: 1280, height: 720 },
+);
 
 // Format excerpt
 const rawExcerpt = tool.excerpt?.rendered || '';
@@ -30,14 +36,15 @@ const version = tool.tool_meta?.version || '';
   <a
     href={`/tools/${tool.slug}`}
     data-astro-prefetch="hover"
+    aria-label={tool.title.rendered}
     class="block relative w-full aspect-video overflow-hidden bg-slate-100 dark:bg-slate-900 rounded-t-xl"
   >
     <img
-      src={featuredImage}
-      alt={tool.title.rendered}
+      {...picture}
+      alt=""
       transition:name={`tool-image-${tool.slug}`}
       class="w-full h-full object-cover rounded-t-xl transition-transform duration-500 group-hover:scale-105"
-      loading="eager"
+      loading="lazy"
       decoding="async"
     />
     <!-- Gradient Overlay for Contrast -->
@@ -76,7 +83,7 @@ const version = tool.tool_meta?.version || '';
     </p>
 
     <!-- Meta specs row -->
-    <div class="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500 pt-3 border-t border-slate-100 dark:border-white/5 mb-4">
+    <div class="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-400 pt-3 border-t border-slate-100 dark:border-white/5 mb-4">
       <div class="flex items-center gap-1.5 truncate">
         <FileSpreadsheet className="w-3.5 h-3.5 text-[#162d59] shrink-0" />
         <span class="truncate">{format}</span>
@@ -91,10 +98,10 @@ const version = tool.tool_meta?.version || '';
     <!-- Bottom Row: Price/Free on Left, CTA on Right -->
     <div class="flex items-center justify-between pt-2">
       <div class="flex items-baseline gap-1.5">
-        <span class="text-base sm:text-lg font-extrabold text-emerald-600 dark:text-emerald-400 font-display">
+        <span class="text-base sm:text-lg font-extrabold text-emerald-700 dark:text-emerald-400 font-display">
           ฟรี
         </span>
-        <span class="text-[11px] text-slate-400 dark:text-slate-500 font-normal">
+        <span class="text-xs text-slate-600 dark:text-slate-400 font-normal">
           ไม่มีค่าใช้จ่าย
         </span>
       </div>

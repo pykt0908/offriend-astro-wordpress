@@ -1,5 +1,6 @@
 ---
 import type { WPPost } from '../types/wordpress';
+import { imageProps } from '../lib/image';
 import { FileText } from 'lucide-react';
 
 interface Props {
@@ -9,8 +10,11 @@ interface Props {
 const { post } = Astro.props;
 
 // Extract featured image from _embedded
-const featuredImage =
-  post._embedded?.['wp:featuredmedia']?.[0]?.source_url || null;
+const featuredMedia = post._embedded?.['wp:featuredmedia']?.[0];
+const featuredImage = featuredMedia?.source_url || null;
+const picture = featuredImage
+  ? imageProps(featuredImage, featuredMedia, { width: 1280, height: 720 })
+  : null;
 
 // Extract category name
 const categoryName =
@@ -28,12 +32,13 @@ const postDate = new Date(post.date).toLocaleDateString('th-TH', {
   <!-- Post Thumbnail / Fallback (No category overlay) -->
   <a href={`/blog/${post.slug}`} class="block relative w-full h-48 sm:h-52 overflow-hidden bg-slate-100 dark:bg-[#0c1222]">
     {
-      featuredImage ? (
+      picture ? (
         <img
-          src={featuredImage}
+          {...picture}
           alt={post.title.rendered}
           class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
+          decoding="async"
         />
       ) : (
         <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-sky-50 dark:from-[#0c1427] dark:to-[#122040] p-4 text-center">

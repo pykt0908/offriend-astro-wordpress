@@ -70,11 +70,20 @@ html:not(.dark) .theme-icon-moon {
 }
 
 @font-face {
+  font-family: 'LINE Seed Sans TH Fallback';
+  src: local('Leelawadee UI'), local('Thonburi'), local('Tahoma'), local('Arial');
+  size-adjust: 105%;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+
+@font-face {
   font-family: 'LINE Seed Sans TH';
   src: url('/fonts/lineseed/LINESeedSansTH_W_Th.woff2') format('woff2');
   font-weight: 100 200;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 @font-face {
@@ -82,7 +91,7 @@ html:not(.dark) .theme-icon-moon {
   src: url('/fonts/lineseed/LINESeedSansTH_W_Rg.woff2') format('woff2');
   font-weight: 300 400 500;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 @font-face {
@@ -90,7 +99,7 @@ html:not(.dark) .theme-icon-moon {
   src: url('/fonts/lineseed/LINESeedSansTH_W_Bd.woff2') format('woff2');
   font-weight: 600 700;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 @font-face {
@@ -98,7 +107,7 @@ html:not(.dark) .theme-icon-moon {
   src: url('/fonts/lineseed/LINESeedSansTH_W_XBd.woff2') format('woff2');
   font-weight: 800;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 @font-face {
@@ -106,13 +115,13 @@ html:not(.dark) .theme-icon-moon {
   src: url('/fonts/lineseed/LINESeedSansTH_W_He.woff2') format('woff2');
   font-weight: 900;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 @theme {
-  --font-sans: 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
-  --font-display: 'LINE Seed Sans TH', system-ui, sans-serif;
-  --font-content: 'Google Sans', 'Google Sans Flex', 'Noto Sans Thai', 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
+  --font-sans: 'LINE Seed Sans TH', 'LINE Seed Sans TH Fallback', system-ui, -apple-system, sans-serif;
+  --font-display: 'LINE Seed Sans TH', 'LINE Seed Sans TH Fallback', system-ui, sans-serif;
+  --font-content: 'LINE Seed Sans TH', 'LINE Seed Sans TH Fallback', system-ui, -apple-system, sans-serif;
 
   /* Primary: Dark Navy Blue (สีน้ำเงินเข้ม พรีเมียม ปราศจากโทนเขียว teal) */
   --color-brand-primary: #162d59;        /* deep classic navy blue */
@@ -129,9 +138,9 @@ html:not(.dark) .theme-icon-moon {
 
 /* Light Theme Variables */
 :root {
-  --font-family-base: 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
-  --font-family-display: 'LINE Seed Sans TH', system-ui, sans-serif;
-  --font-family-content: 'Google Sans', 'Google Sans Flex', 'Noto Sans Thai', 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
+  --font-family-base: 'LINE Seed Sans TH', 'LINE Seed Sans TH Fallback', system-ui, -apple-system, sans-serif;
+  --font-family-display: 'LINE Seed Sans TH', 'LINE Seed Sans TH Fallback', system-ui, sans-serif;
+  --font-family-content: 'LINE Seed Sans TH', 'LINE Seed Sans TH Fallback', system-ui, -apple-system, sans-serif;
   --bg-primary: #f8fafc;
   --bg-surface: #ffffff;
   --bg-card: #ffffff;
@@ -172,13 +181,13 @@ html.dark {
 }
 
 html {
-  font-family: 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
+  font-family: 'LINE Seed Sans TH', 'LINE Seed Sans TH Fallback', system-ui, -apple-system, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
 }
 
 body {
-  font-family: 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
+  font-family: 'LINE Seed Sans TH', 'LINE Seed Sans TH Fallback', system-ui, -apple-system, sans-serif;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -207,7 +216,7 @@ nav *,
 #mobile-drawer *,
 footer nav,
 footer nav * {
-  font-family: 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif !important;
+  font-family: 'LINE Seed Sans TH', 'LINE Seed Sans TH Fallback', system-ui, -apple-system, sans-serif !important;
 }
 
 /* 2. Headings, Titles, Buttons & Badges: STRICTLY LINE Seed Sans TH */
@@ -216,7 +225,7 @@ h1, h2, h3, h4, h5, h6,
 .btn-brand-primary,
 .btn-brand-secondary,
 button {
-  font-family: 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
+  font-family: 'LINE Seed Sans TH', 'LINE Seed Sans TH Fallback', system-ui, -apple-system, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -230,7 +239,7 @@ button,
   -webkit-touch-callout: none;
 }
 
-/* 3. ONLY Content & Body Text: Uses Google Sans */
+/* 3. Body copy uses the same LINE Seed stack, with a metric-adjusted fallback */
 p,
 article,
 article p,

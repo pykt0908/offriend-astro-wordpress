@@ -9,7 +9,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "start": "node server.mjs",
+    "astro": "astro",
+    "optimize:images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^11.1.6",
@@ -21,6 +23,7 @@
     "lucide-react": "^1.49.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.3.3"
   },
   "allowScripts": {

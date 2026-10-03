@@ -91,6 +91,26 @@ export interface WPPage {
   };
 }
 
+export interface WPToolFormat {
+  id: number;
+  name: string;
+  slug: string;
+  count: number;
+  description?: string;
+  sort_order?: number;
+}
+
+export interface WPToolCategory {
+  id: number;
+  name: string;
+  slug: string;
+  count: number;
+  description?: string;
+  icon?: string;
+  color?: string;
+  sort_order?: number;
+}
+
 export interface WPTool {
   id: number;
   date: string;
@@ -120,7 +140,11 @@ export interface WPTool {
     }>;
     demo_url?: string;
     category?: string;
+    category_name?: string;
     category_slug?: string;
+    category_slugs?: string[];
+    format_slug?: string;
+    format_slugs?: string[];
   };
   _embedded?: {
     'wp:featuredmedia'?: WPMediaItem[];

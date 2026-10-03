@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getProjectsFromWP, getProjectBySlug } from '../../lib/wordpress';
+import { imageProps } from '../../lib/image';
 import {
   Building2,
   Calendar,
@@ -24,10 +25,10 @@ if (!rawProject) {
 
 const allProjects = await getProjectsFromWP();
 const defaultImages: Record<string, string> = {
-  'nextjs-advanced-egat': '/images/contact-seminar.jpg',
-  'workshop-fullstack-nextjs-bts': '/images/solutions/web-development.jpg',
-  'corporate-cloud-devops-mea': '/images/solutions/enterprise-consult.jpg',
-  'headless-wp-astro-enterprise-nstda': '/images/solutions/office-tools.jpg',
+  'nextjs-advanced-egat': '/images/contact-seminar.webp',
+  'workshop-fullstack-nextjs-bts': '/images/solutions/web-development.webp',
+  'corporate-cloud-devops-mea': '/images/solutions/enterprise-consult.webp',
+  'headless-wp-astro-enterprise-nstda': '/images/solutions/office-tools.webp',
 };
 
 const meta = rawProject.project_meta || {};
@@ -39,7 +40,7 @@ const project = {
   location: 'กรุงเทพมหานคร',
   date: meta.year || '2569',
   subtitle: rawProject.title?.rendered || '',
-  image: rawProject.featured_image_url || defaultImages[rawProject.slug] || '/images/contact-seminar.jpg',
+  image: rawProject.featured_image_url || defaultImages[rawProject.slug] || '/images/contact-seminar.webp',
   imageAlt: rawProject.title?.rendered || '',
   excerpt: rawProject.excerpt?.rendered?.replace(/<[^>]*>?/gm, '').trim() || rawProject.content?.rendered?.replace(/<[^>]*>?/gm, '').trim() || '',
   details: {
@@ -50,19 +51,19 @@ const project = {
   },
   gallery: [
     {
-      url: rawProject.featured_image_url || defaultImages[rawProject.slug] || '/images/contact-seminar.jpg',
+      url: rawProject.featured_image_url || defaultImages[rawProject.slug] || '/images/contact-seminar.webp',
       caption: rawProject.title?.rendered || '',
     },
     {
-      url: '/images/solutions/web-development.jpg',
+      url: '/images/solutions/web-development.webp',
       caption: 'ช่วงลงมือทำ Hands-on Workshop และการพัฒนาจริง',
     },
     {
-      url: '/images/solutions/enterprise-consult.jpg',
+      url: '/images/solutions/enterprise-consult.webp',
       caption: 'การอภิปรายและตอบข้อซักถามเชิงลึกเกี่ยวกับสถาปัตยกรรมระบบ',
     },
     {
-      url: '/images/solutions/office-tools.jpg',
+      url: '/images/solutions/office-tools.webp',
       caption: 'การทดสอบประสิทธิภาพและ Performance Benchmarking',
     },
   ],
@@ -77,7 +78,7 @@ const recentProjects = allProjects
     slug: p.slug,
     title: p.title?.rendered || '',
     category: p.project_meta?.category_tag || 'ผลงานทั่วไป',
-    image: p.featured_image_url || defaultImages[p.slug] || '/images/contact-seminar.jpg',
+    image: p.featured_image_url || defaultImages[p.slug] || '/images/contact-seminar.webp',
     imageAlt: p.title?.rendered || '',
     date: p.project_meta?.year || '2569',
   }));
@@ -153,10 +154,11 @@ const pageTitle = `${project.title} — ผลงานและโครงก�
             data-caption={project.title}
           >
             <img
-              src={project.image}
+              {...imageProps(project.image, null, { width: 1600, height: 1000 })}
               alt={project.imageAlt}
               class="w-full h-auto max-h-[500px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
               loading="eager"
+              decoding="async"
             />
             <div class="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <span class="p-3 rounded-full bg-black/60 text-white backdrop-blur-md shadow-lg">
@@ -194,10 +196,11 @@ const pageTitle = `${project.title} — ผลงานและโครงก�
                     data-index={index}
                   >
                     <img
-                      src={item.url}
+                      {...imageProps(item.url, null, { width: 1600, height: 1200 })}
                       alt={item.caption}
                       class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
+                      decoding="async"
                     />
                     <div class="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3">
                       <span class="p-2 rounded-full bg-black/60 text-white backdrop-blur-xs">
@@ -289,6 +292,8 @@ const pageTitle = `${project.title} — ผลงานและโครงก�
           id="lightbox-img"
           src=""
           alt=""
+          width="1600"
+          height="1000"
           class="max-h-[75vh] sm:max-h-[80vh] max-w-[88vw] sm:max-w-[85vw] object-contain rounded-xl shadow-2xl transition-all duration-200"
         />
       </div>

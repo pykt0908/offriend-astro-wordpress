@@ -22,8 +22,8 @@ async function generateFavicons() {
     .toBuffer();
   };
 
-  const buf16_512 = await make512('images/logos/no-bg/1.6TP.png');
-  const buf15_512 = await make512('images/logos/no-bg/1.5TP.png');
+  const buf16_512 = await make512('images/logos/no-bg/1.6TP.webp');
+  const buf15_512 = await make512('images/logos/no-bg/1.5TP.webp');
 
   // Save 512px icon
   fs.writeFileSync(path.join(publicDir, 'favicon.png'), buf16_512);

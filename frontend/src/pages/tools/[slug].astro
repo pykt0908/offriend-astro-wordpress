@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getToolBySlug, getTools, getSiteSettings } from "../../lib/wordpress";
+import { imageProps } from "../../lib/image";
 import type { WPTool } from "../../types/wordpress";
 import ToolCard from "../../components/ToolCard.astro";
 import {
@@ -35,7 +36,7 @@ const otherTools = allTools.filter((t) => t.slug !== tool.slug).slice(0, 3);
 const featuredImage =
   tool.featured_image_url ||
   tool._embedded?.["wp:featuredmedia"]?.[0]?.source_url ||
-  "/images/tools/budget-calculator.jpg";
+  "/images/tools/budget-calculator.webp";
 
 // Meta
 const format = tool.tool_meta?.format || "Excel & Google Sheets";
@@ -175,11 +176,16 @@ const pageTitle = `${tool.title.rendered.replace(/<[^>]+>/g, "")} — เคร�
             class="relative w-full aspect-video rounded-xl overflow-hidden shadow-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-900"
           >
             <img
-              src={featuredImage}
+              {...imageProps(
+                featuredImage,
+                tool._embedded?.["wp:featuredmedia"]?.[0],
+                { width: 1280, height: 720 },
+              )}
               alt={tool.title.rendered}
               transition:name={`tool-image-${tool.slug}`}
               class="w-full h-full object-cover rounded-xl"
               loading="eager"
+              fetchpriority="high"
               decoding="async"
             />
             {
@@ -201,7 +207,7 @@ const pageTitle = `${tool.title.rendered.replace(/<[^>]+>/g, "")} — เคร�
           <div class="flex items-center gap-2 mb-3">
             <span class="w-5 h-0.5 bg-red-500 rounded-full inline-block"></span>
             <span
-              class="text-xs sm:text-sm font-bold tracking-wide text-red-500 font-display"
+              class="text-xs sm:text-sm font-bold tracking-wide text-red-700 dark:text-red-400 font-display"
             >
               {format} · OF-TOOL-{tool.id}
             </span>
@@ -256,7 +262,7 @@ const pageTitle = `${tool.title.rendered.replace(/<[^>]+>/g, "")} — เคร�
                 ฟรี 100%
               </span>
               <span
-                class="text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                class="text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
               >
                 ห้ามทำซ้ำหรือขายต่อ
               </span>
@@ -358,10 +364,11 @@ const pageTitle = `${tool.title.rendered.replace(/<[^>]+>/g, "")} — เคร�
             <div class="flex items-center justify-between gap-3 mb-3">
               <div class="flex items-center gap-2.5">
                 <img
-                  src="/images/logos/no-bg/1.5TP.png"
+                  {...imageProps("/images/logos/no-bg/1.5TP.webp", null, { width: 240, height: 168 })}
                   alt="Offriend Logo"
                   class="h-7 sm:h-8 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.4)]"
                   loading="lazy"
+                  decoding="async"
                 />
                 <span
                   class="text-xs sm:text-sm font-bold text-[#93c5fd] tracking-wide uppercase font-display"

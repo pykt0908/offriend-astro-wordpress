@@ -3,6 +3,8 @@ import type {
   WPPage,
   WPCategory,
   WPTool,
+  WPToolCategory,
+  WPToolFormat,
   SiteSettings,
   WPTeamMember,
   WPService,
@@ -14,7 +16,7 @@ const WP_API_URL =
   import.meta.env.PUBLIC_WORDPRESS_API_URL ||
   'http://localhost/offriend-backend/wp-json/wp/v2';
 
-const CACHE_TTL = import.meta.env.DEV ? 0 : 30 * 1000; // In DEV: 0 (immediate reflection of WP edits), In PROD: 30s
+const CACHE_TTL = import.meta.env.DEV ? 0 : 300 * 1000; // In DEV: 0 (immediate reflection of WP edits), In PROD: 5 min
 
 /**
  * Check if the WordPress REST API is reachable
@@ -228,6 +230,52 @@ export async function getAllToolSlugs(): Promise<string[]> {
   return tools.map((t) => t.slug);
 }
 
+/**
+ * Fetch tool categories from WordPress (taxonomy tool_category)
+ */
+export async function getToolCategories(): Promise<WPToolCategory[]> {
+  return fetchToolTerms<WPToolCategory>( 'tool_category' );
+}
+
+/**
+ * Fetch programs from WordPress (taxonomy tool_format)
+ */
+export async function getToolFormats(): Promise<WPToolFormat[]> {
+  return fetchToolTerms<WPToolFormat>( 'tool_format' );
+}
+
+async function fetchToolTerms<T extends WPToolCategory | WPToolFormat>( restBase: string ): Promise<T[]> {
+  const url = `${WP_API_URL}/${restBase}?per_page=100&hide_empty=false&orderby=name&order=asc`;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!Array.isArray(data)) return [];
+
+    return data.map((term) => {
+      const extra = term.offriend || {};
+      const meta = term.meta || {};
+      const sortOrder = extra.sort_order ?? meta.sort_order;
+      return {
+        id: term.id,
+        name: term.name,
+        slug: term.slug,
+        count: typeof term.count === 'number' ? term.count : 0,
+        description: term.description || '',
+        icon: extra.icon || meta.icon || 'folder',
+        color: extra.color || meta.color || 'text-slate-500',
+        sort_order: sortOrder === undefined || sortOrder === '' ? 100 : Number(sortOrder),
+      };
+    });
+  } catch (error) {
+    return [];
+  }
+}
+
 // ==========================================
 // 3. GLOBAL SITE SETTINGS (OFFRIEND CORE)
 // ==========================================
@@ -304,7 +352,7 @@ function mapWpTeamToMember(wpItem: WPTeamMember): TeamMember {
     nameEn: meta.name_en || '',
     role: meta.role_title || '',
     department: 'วิทยากรและผู้เชี่ยวชาญไอที',
-    avatar: wpItem.featured_image_url || `/images/team/${wpItem.slug}.png`,
+    avatar: wpItem.featured_image_url || `/images/team/${wpItem.slug}.webp`,
     educationLine: meta.education_line || '',
     resumePdf: meta.resume_pdf || '#',
     objective:

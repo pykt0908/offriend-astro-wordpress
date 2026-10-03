@@ -1,9 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import HeroCarousel from '../components/HeroCarousel';
+import HeroCarousel from '../components/HeroCarousel.astro';
 import PostCard from '../components/PostCard.astro';
 import ToolCard from '../components/ToolCard.astro';
 import { getPosts, getTools, getSiteSettings } from '../lib/wordpress';
+import { imageProps, proxiedImage } from '../lib/image';
 import { ArrowUpRight } from 'lucide-react';
 export const prerender = false;
 
@@ -42,7 +43,7 @@ const enterpriseSolutions = [
     desc: 'รวมไฟล์เทมเพลต เครื่องมือคำนวณงบ และแบบฟอร์มสำเร็จรูปสำหรับคนออฟฟิศ โหลดไปปรับใช้กับงานจริงได้ทันที ช่วยประหยัดเวลาทำงาน',
     linkText: 'ดูเครื่องมือและเทมเพลตฟรี',
     href: '/tools',
-    image: '/images/solutions/office-tools.jpg',
+    image: '/images/solutions/office-tools.webp',
     imageAlt: 'Office productivity tools and workspace',
   },
   {
@@ -51,7 +52,7 @@ const enterpriseSolutions = [
     desc: 'รับทำเว็บไซต์บริษัท ระบบร้านค้า และเว็บแอปพลิเคชันตามสั่ง ดีไซน์ทันสมัย ใช้งานง่ายทั้งบนคอมและมือถือ ตอบโจทย์การใช้งานจริง',
     linkText: 'ปรึกษาและประเมินราคา',
     href: '/contact',
-    image: '/images/solutions/web-development.jpg',
+    image: '/images/solutions/web-development.webp',
     imageAlt: 'Web development and software engineering',
   },
   {
@@ -60,7 +61,7 @@ const enterpriseSolutions = [
     desc: 'สร้างเว็บไซต์ด้วย WordPress ที่ทีมงานอัปเดตบทความและรูปภาพเองได้สะดวก พร้อมปรับแต่งให้เปิดหน้าเว็บได้ไว ปลอดภัย และติด SEO ง่าย',
     linkText: 'ดูแนวทางทำเว็บ WordPress',
     href: '/services#headless-cms',
-    image: '/images/solutions/cloud-architecture.jpg',
+    image: '/images/solutions/cloud-architecture.webp',
     imageAlt: 'WordPress web design and cloud systems',
   },
   {
@@ -69,19 +70,26 @@ const enterpriseSolutions = [
     desc: 'รับเขียนโปรแกรมและระบบงานเฉพาะด้าน เชื่อมต่อฐานข้อมูล พร้อมทีมงานคอยดูแลและให้คำปรึกษาหลังส่งมอบงาน ไม่ทิ้งงานแน่นอน',
     linkText: 'พูดคุยโจทย์งานกับเรา',
     href: '/contact',
-    image: '/images/solutions/enterprise-consult.jpg',
+    image: '/images/solutions/enterprise-consult.webp',
     imageAlt: 'Corporate consultation and system development',
   },
 ];
----
 
+const heroSource = siteSettings.banners?.find((banner) => banner.image_url)?.image_url;
+const heroImage = heroSource ? proxiedImage(heroSource, 960) : undefined;
+const heroSrcset = heroSource
+  ? [640, 960, 1280, 1600].map((width) => `${proxiedImage(heroSource, width)} ${width}w`).join(', ')
+  : undefined;
+---
 <BaseLayout
   title="Offriend — ผู้นำด้านการพัฒนาซอฟต์แวร์ คลาวด์ และดิจิทัลโซลูชัน"
   description="Offriend ให้บริการพัฒนาซอฟต์แวร์ เว็บแอปพลิเคชัน แอปมือถือ คลาวด์ และ Headless CMS ขับเคลื่อนธุรกิจสู่อนาคตดิจิทัล"
+  preloadImage={heroImage}
+  preloadSrcset={heroSrcset}
 >
   <!-- Hero Carousel Section (1920x800) -->
   <section class="relative w-full overflow-hidden bg-slate-950">
-    <HeroCarousel client:load slides={siteSettings.banners ?? []} />
+    <HeroCarousel slides={siteSettings.banners ?? []} />
 
   </section>
 
@@ -150,7 +158,7 @@ const enterpriseSolutions = [
                 <!-- Right: Illustration with Fade Mask -->
                 <div class="md:col-span-5 relative overflow-hidden min-h-[140px] md:min-h-full">
                   <img
-                    src={item.image}
+                    {...imageProps(item.image, null, { width: 1600, height: 1000 })}
                     alt={item.imageAlt}
                     class="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
@@ -231,7 +239,7 @@ const enterpriseSolutions = [
           <!-- Kicker matching reference screenshot -->
           <div class="flex items-center gap-2 mb-2">
             <span class="w-5 h-1 bg-red-500 rounded-full inline-block"></span>
-            <span class="text-xs sm:text-sm font-bold tracking-wide text-red-500">
+            <span class="text-xs sm:text-sm font-bold tracking-wide text-red-700">
               แนะนำปี 2026
             </span>
           </div>

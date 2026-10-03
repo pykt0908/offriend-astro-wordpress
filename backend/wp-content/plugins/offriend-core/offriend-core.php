@@ -30,6 +30,20 @@ class Offriend_Headless_Core {
         // Register Custom Post Types & Taxonomies
         add_action( 'init', array( $this, 'register_custom_post_types' ) );
         add_action( 'init', array( $this, 'register_taxonomies' ) );
+        add_action( 'init', array( $this, 'register_tool_category_term_meta' ) );
+        add_action( 'init', array( $this, 'register_tool_format_term_meta' ) );
+        add_action( 'init', array( $this, 'ensure_tool_categories' ), 30 );
+        add_action( 'init', array( $this, 'ensure_tool_formats' ), 30 );
+
+        add_action( 'tool_category_add_form_fields', array( $this, 'render_tool_category_add_fields' ) );
+        add_action( 'tool_category_edit_form_fields', array( $this, 'render_tool_category_edit_fields' ) );
+        add_action( 'created_tool_category', array( $this, 'save_tool_category_term_meta' ) );
+        add_action( 'edited_tool_category', array( $this, 'save_tool_category_term_meta' ) );
+
+        add_action( 'tool_format_add_form_fields', array( $this, 'render_tool_format_add_fields' ) );
+        add_action( 'tool_format_edit_form_fields', array( $this, 'render_tool_format_edit_fields' ) );
+        add_action( 'created_tool_format', array( $this, 'save_tool_format_term_meta' ) );
+        add_action( 'edited_tool_format', array( $this, 'save_tool_format_term_meta' ) );
 
         // Register Meta Boxes & REST Fields
         add_action( 'add_meta_boxes', array( $this, 'register_meta_boxes' ) );
@@ -177,27 +191,599 @@ class Offriend_Headless_Core {
             'show_ui'           => true,
         ) );
 
-        // Tool Categories
+        // Tool Categories — managed in WP admin and consumed by the tools listing sidebar
         register_taxonomy( 'tool_category', 'tools', array(
             'labels' => array(
-                'name'          => 'หมวดหมู่เครื่องมือ',
-                'singular_name' => 'หมวดหมู่เครื่องมือ',
+                'name'              => 'หมวดหมู่เครื่องมือ',
+                'singular_name'     => 'หมวดหมู่เครื่องมือ',
+                'menu_name'         => 'หมวดหมู่',
+                'all_items'         => 'หมวดหมู่ทั้งหมด',
+                'edit_item'         => 'แก้ไขหมวดหมู่',
+                'view_item'         => 'ดูหมวดหมู่',
+                'update_item'       => 'อัปเดตหมวดหมู่',
+                'add_new_item'      => 'เพิ่มหมวดหมู่ใหม่',
+                'new_item_name'     => 'ชื่อหมวดหมู่ใหม่',
+                'search_items'      => 'ค้นหาหมวดหมู่',
+                'not_found'         => 'ไม่พบหมวดหมู่',
+                'parent_item'       => 'หมวดหมู่หลัก',
+                'parent_item_colon' => 'หมวดหมู่หลัก:',
             ),
             'hierarchical'      => true,
-            'show_in_rest'      => true,
+            'public'            => true,
             'show_ui'           => true,
+            'show_admin_column' => true,
+            'show_in_rest'      => true,
+            'rest_base'         => 'tool_category',
         ) );
 
-        // Tool Formats (Excel, Google Sheets, Figma, Web App)
+        // Programs shown on the tools listing "โปรแกรม" tab
         register_taxonomy( 'tool_format', 'tools', array(
             'labels' => array(
-                'name'          => 'รูปแบบโปรแกรม',
-                'singular_name' => 'รูปแบบโปรแกรม',
+                'name'              => 'โปรแกรม',
+                'singular_name'     => 'โปรแกรม',
+                'menu_name'         => 'โปรแกรม',
+                'all_items'         => 'โปรแกรมทั้งหมด',
+                'edit_item'         => 'แก้ไขโปรแกรม',
+                'view_item'         => 'ดูโปรแกรม',
+                'update_item'       => 'อัปเดตโปรแกรม',
+                'add_new_item'      => 'เพิ่มโปรแกรมใหม่',
+                'new_item_name'     => 'ชื่อโปรแกรมใหม่',
+                'search_items'      => 'ค้นหาโปรแกรม',
+                'not_found'         => 'ไม่พบโปรแกรม',
+                'parent_item'       => 'โปรแกรมหลัก',
+                'parent_item_colon' => 'โปรแกรมหลัก:',
             ),
             'hierarchical'      => true,
-            'show_in_rest'      => true,
+            'public'            => true,
             'show_ui'           => true,
+            'show_admin_column' => true,
+            'show_in_rest'      => true,
+            'rest_base'         => 'tool_format',
         ) );
+    }
+
+    /**
+     * Appearance options editors can set on each tool category.
+     */
+    public function tool_category_icon_options() {
+        return array(
+            'sparkles'   => 'ดาว (ทั่วไป)',
+            'calculator' => 'เครื่องคิดเลข (การเงิน)',
+            'kanban'     => 'บอร์ดงาน (โครงการ)',
+            'receipt'    => 'เอกสาร (การขาย)',
+            'users'      => 'บุคลากร',
+            'megaphone'  => 'เมกะโฟน (การตลาด)',
+            'palette'    => 'พาเลต (ออกแบบ)',
+            'bot'        => 'บอท (AI)',
+            'server'     => 'เซิร์ฟเวอร์ (ไอที)',
+            'folder'     => 'โฟลเดอร์',
+            'layers'     => 'เลเยอร์',
+            'laptop'     => 'แล็ปท็อป',
+        );
+    }
+
+    public function tool_category_color_options() {
+        return array(
+            'text-[#162d59]'  => 'กรมท่า (แบรนด์)',
+            'text-emerald-500'=> 'เขียว',
+            'text-indigo-500' => 'คราม',
+            'text-rose-500'   => 'ชมพู',
+            'text-amber-500'  => 'ส้ม',
+            'text-fuchsia-500'=> 'ม่วง',
+            'text-cyan-500'   => 'ฟ้าน้ำทะเล',
+            'text-blue-500'   => 'น้ำเงิน',
+            'text-slate-500'  => 'เทา',
+        );
+    }
+
+    public function register_tool_category_term_meta() {
+        $auth = function() {
+            return current_user_can( 'manage_categories' );
+        };
+
+        register_term_meta( 'tool_category', 'icon', array(
+            'type'              => 'string',
+            'single'            => true,
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'sanitize_key',
+            'auth_callback'     => $auth,
+            'default'           => 'folder',
+        ) );
+        register_term_meta( 'tool_category', 'color', array(
+            'type'              => 'string',
+            'single'            => true,
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'sanitize_text_field',
+            'auth_callback'     => $auth,
+            'default'           => 'text-slate-500',
+        ) );
+        register_term_meta( 'tool_category', 'sort_order', array(
+            'type'              => 'integer',
+            'single'            => true,
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'absint',
+            'auth_callback'     => $auth,
+            'default'           => 100,
+        ) );
+    }
+
+    public function render_tool_category_add_fields() {
+        $icons  = $this->tool_category_icon_options();
+        $colors = $this->tool_category_color_options();
+        ?>
+        <div class="form-field">
+            <label for="tool_category_icon">ไอคอน</label>
+            <select name="tool_category_icon" id="tool_category_icon">
+                <?php foreach ( $icons as $value => $label ) : ?>
+                    <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, 'folder' ); ?>><?php echo esc_html( $label ); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <p>ไอคอนที่แสดงในแถบกรองหมวดหมู่บนหน้าเครื่องมือและเทมเพลต</p>
+        </div>
+        <div class="form-field">
+            <label for="tool_category_color">สีไอคอน</label>
+            <select name="tool_category_color" id="tool_category_color">
+                <?php foreach ( $colors as $value => $label ) : ?>
+                    <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, 'text-slate-500' ); ?>><?php echo esc_html( $label ); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="tool_category_sort_order">ลำดับการแสดง</label>
+            <input type="number" name="tool_category_sort_order" id="tool_category_sort_order" value="100" min="0" step="1" />
+            <p>เลขน้อยอยู่ด้านบน หมวดหมู่ “ทั้งหมด” อยู่บนสุดเสมอ</p>
+        </div>
+        <?php
+    }
+
+    public function render_tool_category_edit_fields( $term ) {
+        $icons  = $this->tool_category_icon_options();
+        $colors = $this->tool_category_color_options();
+        $icon   = get_term_meta( $term->term_id, 'icon', true ) ?: 'folder';
+        $color  = get_term_meta( $term->term_id, 'color', true ) ?: 'text-slate-500';
+        $order  = get_term_meta( $term->term_id, 'sort_order', true );
+        if ( $order === '' ) {
+            $order = 100;
+        }
+        ?>
+        <tr class="form-field">
+            <th scope="row"><label for="tool_category_icon">ไอคอน</label></th>
+            <td>
+                <select name="tool_category_icon" id="tool_category_icon">
+                    <?php foreach ( $icons as $value => $label ) : ?>
+                        <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, $icon ); ?>><?php echo esc_html( $label ); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <p class="description">ไอคอนที่แสดงในแถบกรองหมวดหมู่บนหน้าเครื่องมือและเทมเพลต</p>
+            </td>
+        </tr>
+        <tr class="form-field">
+            <th scope="row"><label for="tool_category_color">สีไอคอน</label></th>
+            <td>
+                <select name="tool_category_color" id="tool_category_color">
+                    <?php foreach ( $colors as $value => $label ) : ?>
+                        <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $value, $color ); ?>><?php echo esc_html( $label ); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </td>
+        </tr>
+        <tr class="form-field">
+            <th scope="row"><label for="tool_category_sort_order">ลำดับการแสดง</label></th>
+            <td>
+                <input type="number" name="tool_category_sort_order" id="tool_category_sort_order" value="<?php echo esc_attr( $order ); ?>" min="0" step="1" />
+                <p class="description">เลขน้อยอยู่ด้านบน</p>
+            </td>
+        </tr>
+        <?php
+    }
+
+    public function save_tool_category_term_meta( $term_id ) {
+        if ( ! isset( $_POST['tool_category_icon'] ) && ! isset( $_POST['tool_category_color'] ) && ! isset( $_POST['tool_category_sort_order'] ) ) {
+            return;
+        }
+        if ( ! current_user_can( 'edit_term', $term_id ) ) {
+            return;
+        }
+
+        $icons  = $this->tool_category_icon_options();
+        $colors = $this->tool_category_color_options();
+
+        $icon = isset( $_POST['tool_category_icon'] ) ? sanitize_key( wp_unslash( $_POST['tool_category_icon'] ) ) : 'folder';
+        if ( ! isset( $icons[ $icon ] ) ) {
+            $icon = 'folder';
+        }
+        update_term_meta( $term_id, 'icon', $icon );
+
+        $color = isset( $_POST['tool_category_color'] ) ? sanitize_text_field( wp_unslash( $_POST['tool_category_color'] ) ) : 'text-slate-500';
+        if ( ! isset( $colors[ $color ] ) ) {
+            $color = 'text-slate-500';
+        }
+        update_term_meta( $term_id, 'color', $color );
+
+        $order = isset( $_POST['tool_category_sort_order'] ) ? absint( $_POST['tool_category_sort_order'] ) : 100;
+        update_term_meta( $term_id, 'sort_order', $order );
+    }
+
+    /**
+     * Create the current sidebar categories once, then attach tools that only
+     * stored a free-text category name.
+     */
+    public function ensure_tool_categories() {
+        if ( get_option( 'offriend_tool_categories_ready' ) ) {
+            return;
+        }
+
+        $defaults = array(
+            array( 'name' => 'การเงิน & บัญชี', 'slug' => 'finance', 'icon' => 'calculator', 'color' => 'text-emerald-500', 'order' => 10 ),
+            array( 'name' => 'บริหารโครงการ', 'slug' => 'project', 'icon' => 'kanban', 'color' => 'text-[#162d59]', 'order' => 20 ),
+            array( 'name' => 'เอกสาร & การขาย', 'slug' => 'sales', 'icon' => 'receipt', 'color' => 'text-indigo-500', 'order' => 30 ),
+            array( 'name' => 'ทรัพยากรบุคคล & KPI', 'slug' => 'hr', 'icon' => 'users', 'color' => 'text-rose-500', 'order' => 40 ),
+            array( 'name' => 'การตลาด & แผนงาน', 'slug' => 'marketing', 'icon' => 'megaphone', 'color' => 'text-amber-500', 'order' => 50 ),
+            array( 'name' => 'ออกแบบ & กราฟิก', 'slug' => 'design', 'icon' => 'palette', 'color' => 'text-fuchsia-500', 'order' => 60 ),
+            array( 'name' => 'ปัญญาประดิษฐ์ & AI', 'slug' => 'ai', 'icon' => 'bot', 'color' => 'text-cyan-500', 'order' => 70 ),
+            array( 'name' => 'ไอที & ระบบเน็ตเวิร์ก', 'slug' => 'it', 'icon' => 'server', 'color' => 'text-blue-500', 'order' => 80 ),
+        );
+
+        foreach ( $defaults as $item ) {
+            $existing = term_exists( $item['slug'], 'tool_category' );
+            if ( ! $existing ) {
+                $existing = term_exists( $item['name'], 'tool_category' );
+            }
+            if ( ! $existing ) {
+                $created = wp_insert_term( $item['name'], 'tool_category', array( 'slug' => $item['slug'] ) );
+                if ( is_wp_error( $created ) ) {
+                    continue;
+                }
+                $term_id = (int) $created['term_id'];
+            } else {
+                $term_id = (int) ( is_array( $existing ) ? $existing['term_id'] : $existing );
+            }
+
+            if ( ! metadata_exists( 'term', $term_id, 'icon' ) ) {
+                update_term_meta( $term_id, 'icon', $item['icon'] );
+            }
+            if ( ! metadata_exists( 'term', $term_id, 'color' ) ) {
+                update_term_meta( $term_id, 'color', $item['color'] );
+            }
+            if ( ! metadata_exists( 'term', $term_id, 'sort_order' ) ) {
+                update_term_meta( $term_id, 'sort_order', $item['order'] );
+            }
+        }
+
+        $tools = get_posts( array(
+            'post_type'      => 'tools',
+            'post_status'    => 'any',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+        ) );
+
+        foreach ( $tools as $tool_id ) {
+            $assigned = wp_get_object_terms( $tool_id, 'tool_category', array( 'fields' => 'ids' ) );
+            if ( ! is_wp_error( $assigned ) && ! empty( $assigned ) ) {
+                continue;
+            }
+
+            $raw = get_post_meta( $tool_id, '_offriend_tool_category_name', true );
+            if ( ! is_string( $raw ) || trim( $raw ) === '' ) {
+                continue;
+            }
+
+            $term_ids = array();
+            foreach ( array_map( 'trim', explode( ',', $raw ) ) as $name ) {
+                $term_id = $this->find_or_create_tool_category( $name );
+                if ( $term_id ) {
+                    $term_ids[] = $term_id;
+                }
+            }
+            if ( ! empty( $term_ids ) ) {
+                wp_set_object_terms( $tool_id, $term_ids, 'tool_category', false );
+            }
+        }
+
+        update_option( 'offriend_tool_categories_ready', '1' );
+    }
+
+    private function find_or_create_tool_category( $name ) {
+        $name = trim( (string) $name );
+        if ( $name === '' ) {
+            return 0;
+        }
+
+        $found = get_term_by( 'name', $name, 'tool_category' );
+        if ( $found && ! is_wp_error( $found ) ) {
+            return (int) $found->term_id;
+        }
+
+        $slug = sanitize_title( $name );
+        if ( $slug ) {
+            $found = get_term_by( 'slug', $slug, 'tool_category' );
+            if ( $found && ! is_wp_error( $found ) ) {
+                return (int) $found->term_id;
+            }
+        }
+
+        $created = wp_insert_term( $name, 'tool_category', $slug ? array( 'slug' => $slug ) : array() );
+        if ( is_wp_error( $created ) ) {
+            if ( isset( $created->error_data['term_exists'] ) ) {
+                return (int) $created->error_data['term_exists'];
+            }
+            return 0;
+        }
+
+        update_term_meta( $created['term_id'], 'icon', 'folder' );
+        update_term_meta( $created['term_id'], 'color', 'text-slate-500' );
+        update_term_meta( $created['term_id'], 'sort_order', 100 );
+        return (int) $created['term_id'];
+    }
+
+    /**
+     * Categories actually attached to a tool, with the old free-text field as fallback.
+     */
+    public function get_tool_category_payload( $post_id ) {
+        $terms = get_the_terms( $post_id, 'tool_category' );
+        $names = array();
+        $slugs = array();
+
+        if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+            foreach ( $terms as $term ) {
+                $names[] = $term->name;
+                $slugs[] = $term->slug;
+            }
+        } else {
+            $raw = get_post_meta( $post_id, '_offriend_tool_category_name', true );
+            if ( is_string( $raw ) && trim( $raw ) !== '' ) {
+                foreach ( array_map( 'trim', explode( ',', $raw ) ) as $name ) {
+                    if ( $name === '' ) {
+                        continue;
+                    }
+                    $names[] = $name;
+                    $matched = get_term_by( 'name', $name, 'tool_category' );
+                    $slugs[] = ( $matched && ! is_wp_error( $matched ) ) ? $matched->slug : sanitize_title( $name );
+                }
+            }
+        }
+
+        return array(
+            'category_name' => implode( ', ', $names ),
+            'category'      => implode( ', ', $names ),
+            'category_slug' => isset( $slugs[0] ) ? $slugs[0] : '',
+            'category_slugs'=> array_values( $slugs ),
+        );
+    }
+
+    public function register_tool_format_term_meta() {
+        register_term_meta( 'tool_format', 'sort_order', array(
+            'type'              => 'integer',
+            'single'            => true,
+            'show_in_rest'      => true,
+            'sanitize_callback' => 'absint',
+            'auth_callback'     => function() {
+                return current_user_can( 'manage_categories' );
+            },
+            'default'           => 100,
+        ) );
+    }
+
+    public function render_tool_format_add_fields() {
+        ?>
+        <div class="form-field">
+            <label for="tool_format_sort_order">ลำดับการแสดง</label>
+            <input type="number" name="tool_format_sort_order" id="tool_format_sort_order" value="100" min="0" step="1" />
+            <p>ชื่อที่กรอกด้านบนจะไปแสดงที่แท็บ “โปรแกรม” บนหน้าเครื่องมือและเทมเพลต เลขน้อยอยู่ด้านบน</p>
+        </div>
+        <?php
+    }
+
+    public function render_tool_format_edit_fields( $term ) {
+        $order = get_term_meta( $term->term_id, 'sort_order', true );
+        if ( $order === '' ) {
+            $order = 100;
+        }
+        ?>
+        <tr class="form-field">
+            <th scope="row"><label for="tool_format_sort_order">ลำดับการแสดง</label></th>
+            <td>
+                <input type="number" name="tool_format_sort_order" id="tool_format_sort_order" value="<?php echo esc_attr( $order ); ?>" min="0" step="1" />
+                <p class="description">เลขน้อยอยู่ด้านบนของแท็บโปรแกรม</p>
+            </td>
+        </tr>
+        <?php
+    }
+
+    public function save_tool_format_term_meta( $term_id ) {
+        if ( ! isset( $_POST['tool_format_sort_order'] ) ) {
+            return;
+        }
+        if ( ! current_user_can( 'edit_term', $term_id ) ) {
+            return;
+        }
+        update_term_meta( $term_id, 'sort_order', absint( $_POST['tool_format_sort_order'] ) );
+    }
+
+    /**
+     * Create the current program list once, then attach tools that only stored a free-text format.
+     */
+    public function ensure_tool_formats() {
+        if ( get_option( 'offriend_tool_formats_ready' ) ) {
+            return;
+        }
+
+        $defaults = array(
+            array( 'name' => 'Microsoft Excel', 'slug' => 'excel', 'order' => 10 ),
+            array( 'name' => 'Google Sheets', 'slug' => 'sheets', 'order' => 20 ),
+            array( 'name' => 'Web Application', 'slug' => 'web', 'order' => 30 ),
+            array( 'name' => 'Figma & Canva', 'slug' => 'design', 'order' => 40 ),
+            array( 'name' => 'PDF & เอกสาร', 'slug' => 'doc', 'order' => 50 ),
+        );
+
+        foreach ( $defaults as $item ) {
+            $existing = term_exists( $item['slug'], 'tool_format' );
+            if ( ! $existing ) {
+                $existing = term_exists( $item['name'], 'tool_format' );
+            }
+            if ( ! $existing ) {
+                $created = wp_insert_term( $item['name'], 'tool_format', array( 'slug' => $item['slug'] ) );
+                if ( is_wp_error( $created ) ) {
+                    continue;
+                }
+                $term_id = (int) $created['term_id'];
+            } else {
+                $term_id = (int) ( is_array( $existing ) ? $existing['term_id'] : $existing );
+            }
+
+            if ( ! metadata_exists( 'term', $term_id, 'sort_order' ) ) {
+                update_term_meta( $term_id, 'sort_order', $item['order'] );
+            }
+        }
+
+        $tools = get_posts( array(
+            'post_type'      => 'tools',
+            'post_status'    => 'any',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+        ) );
+
+        foreach ( $tools as $tool_id ) {
+            $assigned = wp_get_object_terms( $tool_id, 'tool_format', array( 'fields' => 'ids' ) );
+            if ( ! is_wp_error( $assigned ) && ! empty( $assigned ) ) {
+                continue;
+            }
+
+            $raw = get_post_meta( $tool_id, '_offriend_tool_format', true );
+            if ( ! is_string( $raw ) || trim( $raw ) === '' ) {
+                continue;
+            }
+
+            $term_ids = array();
+            $matched_slugs = $this->match_tool_format_slugs( $raw );
+            if ( ! empty( $matched_slugs ) ) {
+                foreach ( $matched_slugs as $slug ) {
+                    $term = get_term_by( 'slug', $slug, 'tool_format' );
+                    if ( $term && ! is_wp_error( $term ) ) {
+                        $term_ids[] = (int) $term->term_id;
+                    }
+                }
+            } else {
+                foreach ( array_map( 'trim', explode( ',', $raw ) ) as $name ) {
+                    $term_id = $this->find_or_create_tool_format( $name );
+                    if ( $term_id ) {
+                        $term_ids[] = $term_id;
+                    }
+                }
+            }
+
+            if ( ! empty( $term_ids ) ) {
+                wp_set_object_terms( $tool_id, $term_ids, 'tool_format', false );
+            }
+        }
+
+        update_option( 'offriend_tool_formats_ready', '1' );
+    }
+
+    private function match_tool_format_slugs( $text ) {
+        $text  = strtolower( (string) $text );
+        $slugs = array();
+        if ( strpos( $text, 'excel' ) !== false ) {
+            $slugs[] = 'excel';
+        }
+        if ( strpos( $text, 'sheet' ) !== false ) {
+            $slugs[] = 'sheets';
+        }
+        if ( strpos( $text, 'figma' ) !== false || strpos( $text, 'canva' ) !== false ) {
+            $slugs[] = 'design';
+        }
+        if ( strpos( $text, 'pdf' ) !== false || preg_match( '/\bform\b/', $text ) || strpos( $text, 'เอกสาร' ) !== false ) {
+            $slugs[] = 'doc';
+        }
+        if ( strpos( $text, 'web' ) !== false ) {
+            $slugs[] = 'web';
+        }
+        return $slugs;
+    }
+
+    private function find_or_create_tool_format( $name ) {
+        $name = trim( (string) $name );
+        if ( $name === '' ) {
+            return 0;
+        }
+
+        $found = get_term_by( 'name', $name, 'tool_format' );
+        if ( $found && ! is_wp_error( $found ) ) {
+            return (int) $found->term_id;
+        }
+
+        $slug = sanitize_title( $name );
+        if ( $slug ) {
+            $found = get_term_by( 'slug', $slug, 'tool_format' );
+            if ( $found && ! is_wp_error( $found ) ) {
+                return (int) $found->term_id;
+            }
+        }
+
+        $created = wp_insert_term( $name, 'tool_format', $slug ? array( 'slug' => $slug ) : array() );
+        if ( is_wp_error( $created ) ) {
+            if ( isset( $created->error_data['term_exists'] ) ) {
+                return (int) $created->error_data['term_exists'];
+            }
+            return 0;
+        }
+
+        update_term_meta( $created['term_id'], 'sort_order', 100 );
+        return (int) $created['term_id'];
+    }
+
+    /**
+     * Programs attached to a tool, with the old free-text field as fallback.
+     */
+    public function get_tool_format_payload( $post_id ) {
+        $terms = get_the_terms( $post_id, 'tool_format' );
+        $names = array();
+        $slugs = array();
+
+        if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+            usort( $terms, function( $a, $b ) {
+                $order_a = get_term_meta( $a->term_id, 'sort_order', true );
+                $order_b = get_term_meta( $b->term_id, 'sort_order', true );
+                $order_a = ( $order_a === '' || $order_a === false ) ? 100 : (int) $order_a;
+                $order_b = ( $order_b === '' || $order_b === false ) ? 100 : (int) $order_b;
+                if ( $order_a === $order_b ) {
+                    return strcasecmp( $a->name, $b->name );
+                }
+                return $order_a - $order_b;
+            } );
+            foreach ( $terms as $term ) {
+                $names[] = $term->name;
+                $slugs[] = $term->slug;
+            }
+        } else {
+            $raw = get_post_meta( $post_id, '_offriend_tool_format', true );
+            if ( is_string( $raw ) && trim( $raw ) !== '' ) {
+                $matched = $this->match_tool_format_slugs( $raw );
+                if ( ! empty( $matched ) ) {
+                    foreach ( $matched as $slug ) {
+                        $term = get_term_by( 'slug', $slug, 'tool_format' );
+                        if ( $term && ! is_wp_error( $term ) ) {
+                            $names[] = $term->name;
+                            $slugs[] = $term->slug;
+                        } else {
+                            $slugs[] = $slug;
+                        }
+                    }
+                    if ( empty( $names ) ) {
+                        $names[] = trim( $raw );
+                    }
+                } else {
+                    $names[] = trim( $raw );
+                    $slugs[] = sanitize_title( $raw );
+                }
+            }
+        }
+
+        return array(
+            'format'       => implode( ', ', $names ),
+            'format_slug'  => isset( $slugs[0] ) ? $slugs[0] : '',
+            'format_slugs' => array_values( $slugs ),
+        );
     }
 
     /**
@@ -397,8 +983,6 @@ class Offriend_Headless_Core {
      */
     public function render_tool_meta_box( $post ) {
         wp_nonce_field( 'offriend_meta_nonce_action', 'offriend_meta_nonce' );
-        $category_name = get_post_meta( $post->ID, '_offriend_tool_category_name', true );
-        $format        = get_post_meta( $post->ID, '_offriend_tool_format', true );
         $version       = get_post_meta( $post->ID, '_offriend_tool_version', true );
         $badge         = get_post_meta( $post->ID, '_offriend_tool_badge', true );
         $downloads     = get_post_meta( $post->ID, '_offriend_tool_downloads', true );
@@ -409,12 +993,16 @@ class Offriend_Headless_Core {
         ?>
         <table class="form-table" style="width: 100%;">
             <tr>
-                <th style="width: 25%;"><label for="tool_category_name">หมวดหมู่เครื่องมือ</label></th>
-                <td><input type="text" id="tool_category_name" name="tool_category_name" value="<?php echo esc_attr( $category_name ); ?>" class="regular-text" placeholder="เช่น การตลาด & แผนงาน, บริหารโครงการ" /></td>
+                <th style="width: 25%;">หมวดหมู่เครื่องมือ</th>
+                <td>
+                    <p style="margin: 0.3em 0;">เลือกหมวดหมู่จากกล่อง <strong>หมวดหมู่เครื่องมือ</strong> ในหน้านี้ เพิ่ม เปลี่ยนชื่อ เรียงลำดับ หรือลบหมวดหมู่ได้ที่เมนู <a href="<?php echo esc_url( admin_url( 'edit-tags.php?taxonomy=tool_category&post_type=tools' ) ); ?>">เครื่องมือและเทมเพลต → หมวดหมู่</a></p>
+                </td>
             </tr>
             <tr>
-                <th><label for="tool_format">รูปแบบโปรแกรม</label></th>
-                <td><input type="text" id="tool_format" name="tool_format" value="<?php echo esc_attr( $format ); ?>" class="regular-text" placeholder="เช่น Google Sheets & Excel, Figma Template" /></td>
+                <th>โปรแกรม</th>
+                <td>
+                    <p style="margin: 0.3em 0;">เลือกโปรแกรมจากกล่อง <strong>โปรแกรม</strong> ในหน้านี้ เครื่องมือหนึ่งชิ้นเลือกได้หลายโปรแกรม เพิ่ม เปลี่ยนชื่อ เรียงลำดับ หรือลบได้ที่เมนู <a href="<?php echo esc_url( admin_url( 'edit-tags.php?taxonomy=tool_format&post_type=tools' ) ); ?>">เครื่องมือและเทมเพลต → โปรแกรม</a></p>
+                </td>
             </tr>
             <tr>
                 <th><label for="tool_version">เวอร์ชัน</label></th>
@@ -540,8 +1128,10 @@ class Offriend_Headless_Core {
 
         // Tools
         if ( 'tools' === get_post_type( $post_id ) ) {
-            if ( isset( $_POST['tool_category_name'] ) ) update_post_meta( $post_id, '_offriend_tool_category_name', sanitize_text_field( $_POST['tool_category_name'] ) );
-            if ( isset( $_POST['tool_format'] ) ) update_post_meta( $post_id, '_offriend_tool_format', sanitize_text_field( $_POST['tool_format'] ) );
+            $category_payload = $this->get_tool_category_payload( $post_id );
+            update_post_meta( $post_id, '_offriend_tool_category_name', $category_payload['category_name'] );
+            $format_payload = $this->get_tool_format_payload( $post_id );
+            update_post_meta( $post_id, '_offriend_tool_format', $format_payload['format'] );
             if ( isset( $_POST['tool_version'] ) ) update_post_meta( $post_id, '_offriend_tool_version', sanitize_text_field( $_POST['tool_version'] ) );
             if ( isset( $_POST['tool_badge'] ) ) update_post_meta( $post_id, '_offriend_tool_badge', sanitize_text_field( $_POST['tool_badge'] ) );
             if ( isset( $_POST['tool_downloads'] ) ) update_post_meta( $post_id, '_offriend_tool_downloads', sanitize_text_field( $_POST['tool_downloads'] ) );
@@ -679,14 +1269,19 @@ class Offriend_Headless_Core {
         register_rest_field( 'tools', 'tool_meta', array(
             'get_callback' => function( $post_arr ) {
                 $id = $post_arr['id'];
-                $cat = get_post_meta( $id, '_offriend_tool_category_name', true ) ?: '';
+                $category = $this->get_tool_category_payload( $id );
+                $format   = $this->get_tool_format_payload( $id );
                 $dl  = get_post_meta( $id, '_offriend_tool_download_url', true ) ?: '';
                 $manual = get_post_meta( $id, '_offriend_tool_manual_url', true ) ?: '';
                 $faqs_raw = get_post_meta( $id, '_offriend_tool_faqs', true ) ?: '';
                 return array(
-                    'category_name' => $cat,
-                    'category'      => $cat,
-                    'format'        => get_post_meta( $id, '_offriend_tool_format', true ) ?: '',
+                    'category_name' => $category['category_name'],
+                    'category'      => $category['category'],
+                    'category_slug' => $category['category_slug'],
+                    'category_slugs'=> $category['category_slugs'],
+                    'format'        => $format['format'],
+                    'format_slug'   => $format['format_slug'],
+                    'format_slugs'  => $format['format_slugs'],
                     'version'       => get_post_meta( $id, '_offriend_tool_version', true ) ?: '',
                     'badge'         => get_post_meta( $id, '_offriend_tool_badge', true ) ?: '',
                     'downloads'     => get_post_meta( $id, '_offriend_tool_downloads', true ) ?: '',
@@ -698,6 +1293,28 @@ class Offriend_Headless_Core {
                     'guide_url'     => $manual,
                     'faqs_raw'      => $faqs_raw,
                     'faqs'          => $this->parse_faqs_text( $faqs_raw ),
+                );
+            },
+        ) );
+
+        register_rest_field( 'tool_category', 'offriend', array(
+            'get_callback' => function( $term ) {
+                $term_id = isset( $term['id'] ) ? (int) $term['id'] : 0;
+                $order   = get_term_meta( $term_id, 'sort_order', true );
+                return array(
+                    'icon'       => get_term_meta( $term_id, 'icon', true ) ?: 'folder',
+                    'color'      => get_term_meta( $term_id, 'color', true ) ?: 'text-slate-500',
+                    'sort_order' => ( $order === '' || $order === false ) ? 100 : (int) $order,
+                );
+            },
+        ) );
+
+        register_rest_field( 'tool_format', 'offriend', array(
+            'get_callback' => function( $term ) {
+                $term_id = isset( $term['id'] ) ? (int) $term['id'] : 0;
+                $order   = get_term_meta( $term_id, 'sort_order', true );
+                return array(
+                    'sort_order' => ( $order === '' || $order === false ) ? 100 : (int) $order,
                 );
             },
         ) );

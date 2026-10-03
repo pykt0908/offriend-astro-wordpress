@@ -5,29 +5,53 @@ import BackToTop from '../components/BackToTop.astro';
 import CookieConsent from '../components/CookieConsent.astro';
 import SearchModal from '../components/SearchModal.astro';
 import { ClientRouter } from 'astro:transitions';
+import { getLocale } from '../i18n/locale';
 import '../styles/global.css';
 
 interface Props {
   title?: string;
   description?: string;
   image?: string;
+  preloadImage?: string;
+  preloadSrcset?: string;
 }
 
 const {
   title = 'Offriend — Software & Digital Engineering Company',
   description = 'Offriend ผู้นำด้านการพัฒนาซอฟต์แวร์ คลาวด์ และดิจิทัลทรานส์ฟอร์เมชัน ขับเคลื่อนธุรกิจสู่ความสำเร็จด้วยเทคโนโลยีสมัยใหม่',
-  image = '/images/logos/no-bg/1.7TP.png',
+  image = '/images/logos/no-bg/1.7TP.webp',
+  preloadImage,
+  preloadSrcset,
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
 const siteUrl = Astro.site ? Astro.site.toString() : 'http://localhost:4321';
+const locale = getLocale(Astro.cookies);
 ---
 
 <!doctype html>
-<html lang="th">
+<html lang={locale}>
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <ClientRouter />
+    <script is:inline define:vars={{ locale }}>
+      const applyLocale = (doc = document) => {
+        const fromCookie = document.cookie.match(/(?:^|;\s*)offriend_lang=([^;]+)/);
+        const lang = fromCookie && decodeURIComponent(fromCookie[1]) === 'en' ? 'en' : (locale === 'en' ? 'en' : 'th');
+        doc.documentElement.lang = lang;
+        if (lang === 'en') doc.documentElement.classList.add('translating');
+        else doc.documentElement.classList.remove('translating', 'lang-ready');
+      };
+      applyLocale();
+      document.addEventListener('astro:before-swap', (event) => {
+        applyLocale(event.newDocument);
+      });
+    </script>
+    <style is:inline>
+      html.translating body { visibility: hidden; }
+      html.translating.lang-ready body { visibility: visible; }
+    </style>
     
     <!-- Theme Initializer (Zero-Flicker: Sets theme before DOM swap) -->
     <script is:inline>
@@ -50,16 +74,18 @@ const siteUrl = Astro.site ? Astro.site.toString() : 'http://localhost:4321';
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="shortcut icon" href="/favicon.ico" />
+    {preloadImage && (
+      <link
+        rel="preload"
+        as="image"
+        href={preloadImage}
+        imagesrcset={preloadSrcset}
+        imagesizes="100vw"
+        fetchpriority="high"
+      />
+    )}
     
-    <!-- Google Fonts: Google Sans, Google Sans Flex & Noto Sans Thai -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,700&family=Google+Sans+Flex:wght@400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- Preload LINE Seed Sans TH Fonts -->
+    <!-- Preload the two LINE Seed weights used above the fold -->
     <link
       rel="preload"
       href="/fonts/lineseed/LINESeedSansTH_W_Rg.woff2"
@@ -101,5 +127,35 @@ const siteUrl = Astro.site ? Astro.site.toString() : 'http://localhost:4321';
     <BackToTop />
     <CookieConsent />
     <SearchModal />
+    <script>
+      import { applyTranslations, isEnglishLocale } from '../i18n/apply';
+
+      let queued = false;
+
+      function revealLocale() {
+        if (!isEnglishLocale()) return;
+        applyTranslations(document.body);
+        document.documentElement.classList.add('lang-ready');
+      }
+
+      function scheduleReveal() {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => {
+          queued = false;
+          revealLocale();
+        });
+      }
+
+      revealLocale();
+      document.addEventListener('astro:page-load', revealLocale);
+      document.addEventListener('astro:after-swap', revealLocale);
+
+      const observer = new MutationObserver(() => {
+        if (isEnglishLocale()) scheduleReveal();
+      });
+      observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+      window.setTimeout(() => document.documentElement.classList.add('lang-ready'), 1200);
+    </script>
   </body>
 </html>

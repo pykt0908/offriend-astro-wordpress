@@ -1,29 +1,38 @@
 ---
-import {
-  Search as SearchIcon,
-  X,
-  Laptop,
-  Briefcase,
-  FileText,
-  Wrench,
-  ArrowRight,
-  Sparkles,
-} from 'lucide-react';
+import { Search as SearchIcon, X } from 'lucide-react';
+import { getPosts, getTools } from '../lib/wordpress';
 
+function plainText(value: string): string {
+  return value
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&#038;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#8211;/g, '–')
+    .replace(/&#8212;/g, '—')
+    .trim();
+}
 
+const [tools, posts] = await Promise.all([
+  getTools({ perPage: 4 }),
+  getPosts({ perPage: 4 }),
+]);
 
-const popularTechs = [
-  { name: 'Excel & Sheets', count: 27, iconColor: 'text-emerald-600 dark:text-emerald-400', tag: 'Excel', query: 'Excel' },
-  { name: 'Next.js', count: 22, iconColor: 'text-slate-900 dark:text-white', tag: 'Next.js', query: 'Next.js' },
-  { name: 'Python', count: 19, iconColor: 'text-amber-500', tag: 'Python', query: 'Python' },
-  { name: 'React', count: 17, iconColor: 'text-sky-500', tag: 'React', query: 'React' },
-  { name: 'WordPress', count: 15, iconColor: 'text-blue-600', tag: 'WordPress', query: 'WordPress' },
-  { name: 'JavaScript', count: 14, iconColor: 'text-yellow-500', tag: 'JS', query: 'JavaScript' },
-  { name: 'Astro', count: 14, iconColor: 'text-purple-500', tag: 'Astro', query: 'Astro' },
-  { name: 'Cloud & AWS', count: 13, iconColor: 'text-orange-500', tag: 'AWS', query: 'Cloud' },
-  { name: 'AI & Prompts', count: 12, iconColor: 'text-cyan-500', tag: 'AI', query: 'AI' },
-  { name: 'SQL & Database', count: 11, iconColor: 'text-rose-500', tag: 'SQL', query: 'ระบบ' },
-];
+const popularTools = tools.map((tool) => ({
+  title: plainText(tool.title?.rendered || ''),
+  href: `/tools/${tool.slug}`,
+  meta: tool.tool_meta?.format || tool.tool_meta?.badge || 'เครื่องมือ',
+}));
+
+const popularPosts = posts.map((post) => ({
+  title: plainText(post.title?.rendered || ''),
+  href: `/blog/${post.slug}`,
+  meta: new Date(post.date).toLocaleDateString('th-TH', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }),
+}));
 ---
 
 <!-- Full-screen Search Overlay Modal matching user screenshot -->
@@ -42,7 +51,7 @@ const popularTechs = [
         <div
           class="flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-3.5 rounded-2xl sm:rounded-full bg-white dark:bg-[#0c1222] border-2 border-[#38bdf8] shadow-sm focus-within:ring-4 focus-within:ring-[#38bdf8]/20 transition-all"
         >
-          <SearchIcon className="w-5 h-5 text-slate-400 shrink-0" />
+          <SearchIcon className="w-5 h-5 text-slate-600 dark:text-slate-300 shrink-0" />
           
           <input
             type="text"
@@ -50,7 +59,7 @@ const popularTechs = [
             name="q"
             placeholder="ค้นหาผลงาน, บริการ, บทความ, เครื่องมือ..."
             autocomplete="off"
-            class="w-full text-slate-900 dark:text-white placeholder-slate-400 text-sm sm:text-base font-medium focus:outline-none bg-transparent"
+            class="w-full text-slate-900 dark:text-white placeholder:text-slate-600 dark:placeholder:text-slate-300 text-sm sm:text-base font-medium focus:outline-none bg-transparent"
           />
 
           <!-- Close button [X] -->
@@ -66,39 +75,69 @@ const popularTechs = [
       </form>
     </div>
 
-    <!-- 1. DEFAULT VIEW: โปรแกรมยอดนิยม (when search input is empty) -->
-    <div id="modal-search-default-view" class="space-y-6 animate-in fade-in duration-150">
+    <!-- 1. DEFAULT VIEW: real tools and articles (when search input is empty) -->
+    <div id="modal-search-default-view" class="space-y-8 animate-in fade-in duration-150">
+      {(popularTools.length > 0 || popularPosts.length > 0) && (
+        <div class="space-y-6">
+          <h4 class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-wide">
+            เครื่องมือและบทความยอดนิยม
+          </h4>
 
-      <!-- โปรแกรมและเทคโนโลยียอดนิยม (Grid of Cards) -->
-      <div>
-        <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 tracking-wide">
-          โปรแกรมและเทคโนโลยียอดนิยม
-        </h4>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {
-            popularTechs.map((tech) => (
-              <button
-                type="button"
-                class="modal-quick-tech p-3 rounded-xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#0c1222] hover:border-[#38bdf8] dark:hover:border-[#38bdf8] hover:shadow-sm transition-all cursor-pointer text-left flex items-center justify-between group shadow-2xs"
-                data-keyword={tech.query}
-              >
-                <div class="flex items-center gap-2.5 min-w-0">
-                  <span class={`font-mono text-xs font-black ${tech.iconColor} shrink-0`}>
-                    {tech.tag}
-                  </span>
-                  <span class="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-[#162d59] dark:group-hover:text-[#38bdf8] transition-colors truncate">
-                    {tech.name}
-                  </span>
-                </div>
-                <span class="text-[11px] font-medium text-slate-400 shrink-0 ml-1.5">
-                  {tech.count}
-                </span>
-              </button>
-            ))
-          }
+          {popularTools.length > 0 && (
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between gap-3">
+                <h5 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                  เครื่องมือ
+                </h5>
+                <a href="/tools" class="text-xs font-bold text-[#162d59] dark:text-[#38bdf8] hover:underline">
+                  ดูทั้งหมด
+                </a>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {popularTools.map((item) => (
+                  <a
+                    href={item.href}
+                    class="group flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#0c1222] hover:border-[#38bdf8] hover:shadow-sm transition-all"
+                  >
+                    <span class="min-w-0">
+                      <span class="block text-[11px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">{item.meta}</span>
+                      <span class="block text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#162d59] dark:group-hover:text-[#38bdf8] truncate">{item.title}</span>
+                    </span>
+                    <span class="text-slate-400 group-hover:text-[#162d59] dark:group-hover:text-[#38bdf8] shrink-0" aria-hidden="true">→</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {popularPosts.length > 0 && (
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between gap-3">
+                <h5 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                  บทความ
+                </h5>
+                <a href="/blog" class="text-xs font-bold text-[#162d59] dark:text-[#38bdf8] hover:underline">
+                  ดูทั้งหมด
+                </a>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {popularPosts.map((item) => (
+                  <a
+                    href={item.href}
+                    class="group flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#0c1222] hover:border-[#38bdf8] hover:shadow-sm transition-all"
+                  >
+                    <span class="min-w-0">
+                      <span class="block text-[11px] font-bold text-slate-600 dark:text-slate-300">{item.meta}</span>
+                      <span class="block text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#162d59] dark:group-hover:text-[#38bdf8] truncate">{item.title}</span>
+                    </span>
+                    <span class="text-slate-400 group-hover:text-[#162d59] dark:group-hover:text-[#38bdf8] shrink-0" aria-hidden="true">→</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      </div>
-
+      )}
     </div>
 
     <!-- 2. LIVE RESULTS VIEW (shown dynamically when typing) -->
@@ -223,31 +262,38 @@ const popularTechs = [
         if (input.value.trim() !== q) return;
 
         if (!data || data.total === 0) {
+          const emptyTitle = document.documentElement.lang === 'en'
+            ? `No results for "${escapeHtml(q)}"`
+            : `ไม่พบผลการค้นหาสำหรับ "${escapeHtml(q)}"`;
+          const emptyHint = document.documentElement.lang === 'en'
+            ? 'Check the spelling, or try a shorter search.'
+            : 'ลองตรวจสอบตัวสะกด หรือค้นหาด้วยคำที่สั้นลง';
           resultsContent.innerHTML = `
             <div class="py-12 text-center rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-[#0c1222] p-8 space-y-3">
               <h3 class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200">
-                ไม่พบผลการค้นหาสำหรับ "${escapeHtml(q)}"
+                ${emptyTitle}
               </h3>
               <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                ลองตรวจสอบตัวสะกด หรือคลิกเลือกคำค้นหายอดนิยมด้านล่าง
+                ${emptyHint}
               </p>
             </div>
           `;
           return;
         }
 
+        const en = document.documentElement.lang === 'en';
         const categoryBadgeMap: Record<string, { label: string; class: string }> = {
-          services: { label: 'บริการ', class: 'bg-[#162d59]/10 dark:bg-[#38bdf8]/15 text-[#162d59] dark:text-[#38bdf8]' },
-          projects: { label: 'ผลงาน', class: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400' },
-          articles: { label: 'บทความ', class: 'bg-amber-500/10 text-amber-700 dark:text-amber-400' },
-          tools: { label: 'เครื่องมือ', class: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' },
+          services: { label: en ? 'Services' : 'บริการ', class: 'bg-[#162d59]/10 dark:bg-[#38bdf8]/15 text-[#162d59] dark:text-[#38bdf8]' },
+          projects: { label: en ? 'Projects' : 'ผลงาน', class: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400' },
+          articles: { label: en ? 'Articles' : 'บทความ', class: 'bg-amber-500/10 text-amber-700 dark:text-amber-400' },
+          tools: { label: en ? 'Tools' : 'เครื่องมือ', class: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' },
         };
 
         const catNames: Array<{ key: string; name: string }> = [
-          { key: 'services', name: 'บริการ' },
-          { key: 'projects', name: 'ผลงาน' },
-          { key: 'articles', name: 'บทความ' },
-          { key: 'tools', name: 'เครื่องมือ' },
+          { key: 'services', name: en ? 'Services' : 'บริการ' },
+          { key: 'projects', name: en ? 'Projects' : 'ผลงาน' },
+          { key: 'articles', name: en ? 'Articles' : 'บทความ' },
+          { key: 'tools', name: en ? 'Tools' : 'เครื่องมือ' },
         ];
 
         let cardsHtml = '';
@@ -269,7 +315,7 @@ const popularTechs = [
                       <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${badge.class}">
                         ${badge.label}
                       </span>
-                      ${item.subtitle ? `<span class="text-[11px] text-slate-400">· ${escapeHtml(item.subtitle)}</span>` : ''}
+                      ${item.subtitle ? `<span class="text-xs text-slate-600 dark:text-slate-300">· ${escapeHtml(item.subtitle)}</span>` : ''}
                     </div>
                     <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-[#162d59] dark:group-hover:text-[#38bdf8] transition-colors leading-snug">
                       ${escapeHtml(item.title)}
@@ -278,7 +324,7 @@ const popularTechs = [
                   </div>
                   <div class="shrink-0 pt-2 sm:pt-0">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 dark:bg-white/5 group-hover:bg-[#162d59] group-hover:text-white dark:group-hover:bg-[#38bdf8] dark:group-hover:text-slate-950 text-slate-700 dark:text-slate-300 transition-colors">
-                      <span>เปิดดู</span>
+                      <span>${en ? 'Open' : 'เปิดดู'}</span>
                       <span>→</span>
                     </span>
                   </div>
@@ -304,13 +350,15 @@ const popularTechs = [
         resultsContent.innerHTML = `
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-white/10">
             <h3 class="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200">
-              พบข้อมูลทั้งหมด <span class="text-[#162d59] dark:text-[#38bdf8] font-black">${data.total} รายการ</span> สำหรับ "${escapeHtml(q)}"
+              ${en
+                ? `Found <span class="text-[#162d59] dark:text-[#38bdf8] font-black">${data.total} results</span> for "${escapeHtml(q)}"`
+                : `พบข้อมูลทั้งหมด <span class="text-[#162d59] dark:text-[#38bdf8] font-black">${data.total} รายการ</span> สำหรับ "${escapeHtml(q)}"`}
             </h3>
             <a
               href="/search?q=${encodeURIComponent(q)}"
               class="inline-flex items-center gap-1.5 text-xs font-bold text-[#162d59] dark:text-[#38bdf8] hover:underline"
             >
-              <span>ดูผลลัพธ์ทั้งหมดในหน้าค้นหา</span>
+              <span>${en ? 'View all results' : 'ดูผลลัพธ์ทั้งหมดในหน้าค้นหา'}</span>
               <span>→</span>
             </a>
           </div>

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getTeamMemberBySlug } from '../../lib/wordpress';
+import { imageProps } from '../../lib/image';
 import { FileText, ArrowLeft, Briefcase, GraduationCap } from 'lucide-react';
 
 export const prerender = false;
@@ -43,10 +44,11 @@ const pageTitle = `${displayName} (${member.nameEn}) — ${member.role} | Offrie
           <!-- Circular Avatar with Brand Ring -->
           <div class="relative shrink-0">
             <img
-              src={member.avatar}
+              {...imageProps(member.avatar, null, { width: 512, height: 512 })}
               alt={member.name}
               class="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover ring-4 ring-[#38bdf8]/20 dark:ring-[#38bdf8]/30 shadow-md"
               loading="eager"
+              decoding="async"
             />
           </div>
 

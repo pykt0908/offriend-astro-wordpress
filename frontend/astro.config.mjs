@@ -9,12 +9,18 @@ import node from '@astrojs/node';
 
 export default defineConfig({
   output: 'server',
+  build: {
+    inlineStylesheets: 'auto',
+  },
   prefetch: {
-    prefetchAll: true,
+    prefetchAll: false,
     defaultStrategy: 'hover',
   },
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    ssr: {
+      external: ['sharp'],
+    },
   },
 
   integrations: [react()],

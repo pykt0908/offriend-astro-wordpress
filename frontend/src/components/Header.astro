@@ -1,6 +1,8 @@
 ---
 import ThemeToggle from "./ThemeToggle.astro";
 import { getSiteSettings } from "../lib/wordpress";
+import { getLocale, localeSwitchHref, type Locale } from "../i18n/locale";
+import { imageProps } from "../lib/image";
 import {
   Phone,
   Smartphone,
@@ -19,6 +21,10 @@ interface Props {
 
 const { currentPath = "/" } = Astro.props;
 const siteSettings = await getSiteSettings();
+const locale: Locale = getLocale(Astro.cookies);
+const switchTo = (lang: Locale) => localeSwitchHref(lang, currentPath);
+const logoLight = imageProps("/images/logos/no-bg/1.6TP.webp", null, { width: 240, height: 168 });
+const logoDark = imageProps("/images/logos/no-bg/1.5TP.webp", null, { width: 240, height: 168 });
 ---
 
 <!-- 1. TOP ANNOUNCEMENT BAR (Normal flow: naturally scrolls away when user scrolls down) -->
@@ -55,13 +61,13 @@ const siteSettings = await getSiteSettings();
       <button
         type="button"
         data-open-search-modal
-        aria-label="ค้นหาข้อมูล"
+        aria-label="ค้นหาผลงาน, บริการ, บทความ..."
         class="flex items-center justify-between bg-white dark:bg-white/10 rounded-md overflow-hidden max-w-[240px] sm:max-w-[280px] w-full shadow-inner border border-slate-200/60 dark:border-white/10 px-3 py-1.5 cursor-pointer text-left group hover:border-[#38bdf8] transition-colors"
       >
-        <span class="text-slate-400 dark:text-slate-300 text-xs truncate">
+        <span class="text-slate-600 dark:text-slate-300 text-xs truncate">
           ค้นหาผลงาน, บริการ, บทความ...
         </span>
-        <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#38bdf8] shrink-0 ml-1.5 transition-colors" />
+        <Search className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300 group-hover:text-[#38bdf8] shrink-0 ml-1.5 transition-colors" />
       </button>
 
       <!-- Working Hours -->
@@ -77,7 +83,7 @@ const siteSettings = await getSiteSettings();
         href="https://line.me"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center gap-1.5 bg-[#06c755] hover:bg-[#05b34c] text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-sm transition-transform hover:scale-105 whitespace-nowrap"
+        class="inline-flex items-center gap-1.5 bg-[#047a3a] hover:bg-[#036530] text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-sm transition-transform hover:scale-105 whitespace-nowrap"
       >
         <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
           <path
@@ -103,17 +109,19 @@ const siteSettings = await getSiteSettings();
       >
         <!-- Light Mode Emblem (1.6TP.png) -->
         <img
-          src="/images/logos/no-bg/1.6TP.png"
+          {...logoLight}
           alt="ออฟเฟรนด์"
           class="logo-light h-9 sm:h-10 lg:h-[42px] w-auto object-contain"
           loading="eager"
+          decoding="async"
         />
-        <!-- Dark Mode Emblem (1.5TP.png) -->
+        <!-- Dark Mode Emblem -->
         <img
-          src="/images/logos/no-bg/1.5TP.png"
+          {...logoDark}
           alt="ออฟเฟรนด์"
           class="logo-dark h-9 sm:h-10 lg:h-[42px] w-auto object-contain drop-shadow-[0_0_14px_rgba(56,189,248,0.4)]"
           loading="eager"
+          decoding="async"
         />
         <div class="flex flex-col justify-center">
           <span
@@ -122,7 +130,7 @@ const siteSettings = await getSiteSettings();
             ออฟเฟรนด์
           </span>
           <span
-            class="text-[11px] sm:text-[11px] font-medium text-slate-500 dark:text-slate-400 tracking-wide leading-none mt-0.5"
+            class="text-[11px] sm:text-[11px] font-medium text-slate-600 dark:text-slate-300 tracking-wide leading-none mt-0.5"
           >
             เพื่อนคู่คิดคนออฟฟิศ
           </span>
@@ -298,36 +306,56 @@ const siteSettings = await getSiteSettings();
         <ThemeToggle variant="icon" />
 
         <!-- Language Selector Pill (h-10 rounded-lg) -->
-        <div class="relative group">
+        <div id="lang-switcher" class="relative group">
           <button
             type="button"
+            id="lang-switcher-btn"
             class="h-10 px-3.5 flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#162d59] dark:hover:text-[#38bdf8] transition-all shadow-xs cursor-pointer"
-            aria-label="Select Language"
+            aria-label={locale === 'en' ? 'Select language EN' : 'เลือกภาษา TH'}
+            aria-haspopup="true"
+            aria-expanded="false"
           >
             <Globe className="w-4 h-4 text-[#060c2e] dark:text-[#38bdf8]" />
-            <span>TH</span>
+            <span>{locale === 'en' ? 'EN' : 'TH'}</span>
             <ChevronDown className="w-3 h-3 opacity-60 transition-transform group-hover:rotate-180" />
           </button>
           <div
-            class="absolute right-0 top-full pt-1.5 hidden group-hover:block w-44 z-50"
+            id="lang-switcher-menu"
+            class="absolute right-0 top-full pt-1.5 hidden group-hover:block group-[.is-open]:block w-44 z-50"
           >
             <div
               class="bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl shadow-slate-900/10 dark:shadow-black/40 p-1.5 space-y-1"
             >
-              <button
-                type="button"
-                class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl bg-[#e8f0fe] dark:bg-[#162d59]/40 text-[#162d59] dark:text-sky-300 text-left transition-colors cursor-pointer"
+              <a
+                href={switchTo('th')}
+                data-astro-reload
+                data-set-lang
+                class:list={[
+                  'w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-left transition-colors',
+                  locale === 'th'
+                    ? 'bg-[#e8f0fe] dark:bg-[#162d59]/40 text-[#162d59] dark:text-sky-300'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5',
+                ]}
+                aria-current={locale === 'th' ? 'true' : undefined}
               >
                 <span class="text-xs font-bold w-6 tracking-wide">TH</span>
-                <span class="text-sm font-bold font-display">ไทย</span>
-              </button>
-              <button
-                type="button"
-                class="w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 text-left transition-colors cursor-pointer"
+                <span class:list={['text-sm font-display', locale === 'th' ? 'font-bold' : 'font-medium']}>ไทย</span>
+              </a>
+              <a
+                href={switchTo('en')}
+                data-astro-reload
+                data-set-lang
+                class:list={[
+                  'w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-left transition-colors',
+                  locale === 'en'
+                    ? 'bg-[#e8f0fe] dark:bg-[#162d59]/40 text-[#162d59] dark:text-sky-300'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5',
+                ]}
+                aria-current={locale === 'en' ? 'true' : undefined}
               >
-                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 w-6 tracking-wide">EN</span>
-                <span class="text-sm font-medium">English</span>
-              </button>
+                <span class:list={['text-xs font-bold w-6 tracking-wide', locale === 'en' ? '' : 'text-slate-500 dark:text-slate-400']}>EN</span>
+                <span class:list={['text-sm', locale === 'en' ? 'font-bold' : 'font-medium']}>English</span>
+              </a>
             </div>
           </div>
         </div>
@@ -335,7 +363,7 @@ const siteSettings = await getSiteSettings();
         <!-- Prominent CTA Button (Solid Orange, No Gradient) (h-10 rounded-lg) -->
         <a
           href="/contact"
-          class="hidden sm:inline-flex h-10 items-center justify-center px-5 rounded-lg font-bold text-sm text-white bg-orange-500 hover:bg-orange-600 shadow-sm hover:shadow-md hover:shadow-orange-500/30 transition-all duration-200 transform hover:-translate-y-0.5 active:scale-[0.98] whitespace-nowrap"
+          class="hidden sm:inline-flex h-10 items-center justify-center px-5 rounded-lg font-bold text-sm text-white bg-orange-700 hover:bg-orange-800 shadow-sm hover:shadow-md hover:shadow-orange-700/30 transition-all duration-200 transform hover:-translate-y-0.5 active:scale-[0.98] whitespace-nowrap"
         >
           สอบถามบริการ
         </a>
@@ -374,14 +402,16 @@ const siteSettings = await getSiteSettings();
       >
         <a href="/" class="flex items-center gap-2.5">
           <img
-            src="/images/logos/no-bg/1.6TP.png"
+            {...logoLight}
             alt="ออฟเฟรนด์"
             class="logo-light h-9 sm:h-10 w-auto object-contain"
+            decoding="async"
           />
           <img
-            src="/images/logos/no-bg/1.5TP.png"
+            {...logoDark}
             alt="ออฟเฟรนด์"
             class="logo-dark h-9 sm:h-10 w-auto object-contain drop-shadow-[0_0_12px_rgba(56,189,248,0.4)]"
+            decoding="async"
           />
           <div class="flex flex-col justify-center">
             <span
@@ -390,7 +420,7 @@ const siteSettings = await getSiteSettings();
               ออฟเฟรนด์
             </span>
             <span
-              class="text-[10px] font-medium text-slate-500 dark:text-slate-400 tracking-normal leading-none mt-0.5"
+              class="text-[10px] font-medium text-slate-600 dark:text-slate-300 tracking-normal leading-none mt-0.5"
             >
               เพื่อนคู่คิดคนออฟฟิศ
             </span>
@@ -413,10 +443,10 @@ const siteSettings = await getSiteSettings();
         type="button"
         id="mobile-search-trigger-btn"
         data-open-search-modal
-        class="w-full flex items-center justify-between bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10 mb-5 px-3.5 py-2.5 text-xs text-slate-400 cursor-pointer hover:border-[#38bdf8] transition-colors text-left"
+        class="w-full flex items-center justify-between bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10 mb-5 px-3.5 py-2.5 text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:border-[#38bdf8] transition-colors text-left"
       >
         <span>ค้นหาผลงาน, บริการ, เครื่องมือ...</span>
-        <Search className="w-4 h-4 text-slate-400" />
+        <Search className="w-4 h-4 text-slate-600 dark:text-slate-300" />
       </button>
 
       <!-- Vertical Menu Items -->
@@ -523,15 +553,29 @@ const siteSettings = await getSiteSettings();
           <div
             class="inline-flex items-center p-1 rounded-full border border-slate-300 dark:border-white/20 bg-slate-100 dark:bg-white/10 text-xs font-bold"
           >
-            <button
-              type="button"
-              class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#162d59] to-[#0a2d38] text-white"
-              >TH</button
+            <a
+              href={switchTo('th')}
+              data-astro-reload
+              data-set-lang
+              class:list={[
+                'px-2.5 py-0.5 rounded-full',
+                locale === 'th'
+                  ? 'bg-gradient-to-r from-[#162d59] to-[#0a2d38] text-white'
+                  : 'text-slate-600 dark:text-slate-400',
+              ]}
+              >TH</a
             >
-            <button
-              type="button"
-              class="px-2.5 py-0.5 rounded-full text-slate-600 dark:text-slate-400"
-              >EN</button
+            <a
+              href={switchTo('en')}
+              data-astro-reload
+              data-set-lang
+              class:list={[
+                'px-2.5 py-0.5 rounded-full',
+                locale === 'en'
+                  ? 'bg-gradient-to-r from-[#162d59] to-[#0a2d38] text-white'
+                  : 'text-slate-600 dark:text-slate-400',
+              ]}
+              >EN</a
             >
           </div>
         </div>
@@ -540,7 +584,7 @@ const siteSettings = await getSiteSettings();
       <!-- Full-width prominent CTA button at bottom of drawer (Solid Orange) -->
       <a
         href="/contact"
-        class="w-full block text-center py-3.5 px-4 rounded-lg font-bold text-base text-white bg-orange-500 hover:bg-orange-600 shadow-sm hover:shadow-md hover:shadow-orange-500/25 transition-all cursor-pointer"
+        class="w-full block text-center py-3.5 px-4 rounded-lg font-bold text-base text-white bg-orange-700 hover:bg-orange-800 shadow-sm hover:shadow-md hover:shadow-orange-700/25 transition-all cursor-pointer"
       >
         สอบถามบริการ
       </a>
@@ -582,4 +626,39 @@ const siteSettings = await getSiteSettings();
     setupMobileDrawer();
   }
   document.addEventListener("astro:page-load", setupMobileDrawer);
+  document.addEventListener("astro:page-load", setupLanguageMenu);
+  setupLanguageMenu();
+
+  function setupLanguageMenu() {
+    const root = document.getElementById("lang-switcher");
+    const button = document.getElementById("lang-switcher-btn");
+    if (root && button && button.dataset.bound !== "true") {
+      button.dataset.bound = "true";
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const open = root.classList.toggle("is-open");
+        button.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+    }
+
+    document.querySelectorAll("a[data-set-lang]").forEach((link) => {
+      if (!(link instanceof HTMLAnchorElement) || link.dataset.bound === "true") return;
+      link.dataset.bound = "true";
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        window.location.assign(link.href);
+      });
+    });
+  }
+
+  if (!(window as any).__offriendLangCloser) {
+    (window as any).__offriendLangCloser = true;
+    document.addEventListener("click", () => {
+      const root = document.getElementById("lang-switcher");
+      const button = document.getElementById("lang-switcher-btn");
+      root?.classList.remove("is-open");
+      button?.setAttribute("aria-expanded", "false");
+    });
+  }
 </script>

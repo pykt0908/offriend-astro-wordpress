@@ -1,0 +1,228 @@
+---
+import { imageProps } from '../lib/image';
+
+interface Banner {
+  image_url?: string;
+  kicker?: string;
+  title?: string;
+  subtitle?: string;
+  button_text?: string;
+  button_url?: string;
+}
+
+interface Slide {
+  image: string;
+  alt: string;
+  title: string;
+  subtitle: string;
+  ctaText: string;
+  ctaLink: string;
+}
+
+interface Props {
+  slides?: Banner[];
+}
+
+const { slides: wpSlides = [] } = Astro.props;
+
+const defaults: Slide[] = [
+  {
+    image: '/images/placeholders/slide-1.svg',
+    alt: 'Banner Placeholder 1 (1920 x 800)',
+    title: 'Modern Web Architecture & High-Performance Systems',
+    subtitle: 'สถาปัตยกรรมเว็บแอปพลิเคชันและระบบดิจิทัลประสิทธิภาพสูงสำหรับองค์กร',
+    ctaText: 'สำรวจบริการ',
+    ctaLink: '/services',
+  },
+  {
+    image: '/images/placeholders/slide-2.svg',
+    alt: 'Banner Placeholder 2 (1920 x 800)',
+    title: 'Enterprise Web Applications & Portals',
+    subtitle: 'พัฒนาเว็บแอปพลิเคชันและระบบพอร์ทัลองค์กรที่เสถียร ปลอดภัย และขยายตัวได้',
+    ctaText: 'ดูผลงานของเรา',
+    ctaLink: '/projects',
+  },
+  {
+    image: '/images/placeholders/slide-3.svg',
+    alt: 'Banner Placeholder 3 (1920 x 800)',
+    title: 'Headless WordPress CMS & Astro Velocity',
+    subtitle: 'ผสานพลังการบริหารเนื้อหาง่ายดาย เข้ากับความเร็วสูงระดับ Headless',
+    ctaText: 'ปรึกษาเรา',
+    ctaLink: '/contact',
+  },
+];
+
+const usable = wpSlides.filter((slide) => slide.image_url || slide.title);
+const slides: Slide[] =
+  usable.length > 0
+    ? usable.map((slide, index) => ({
+        image: slide.image_url || '/images/placeholders/slide-1.svg',
+        alt: slide.title || `Banner ${index + 1}`,
+        title: slide.title || '',
+        subtitle: slide.subtitle || '',
+        ctaText: slide.button_text || '',
+        ctaLink: slide.button_url || '/',
+      }))
+    : defaults;
+---
+
+<div
+  class="hero-carousel relative w-full overflow-hidden bg-slate-900 select-none"
+  data-hero-carousel
+  role="region"
+  aria-roledescription="carousel"
+  aria-label="แบนเนอร์หน้าแรก"
+>
+  <div class="relative w-full aspect-[1920/800]">
+    {
+      slides.map((slide, index) => {
+        const picture = imageProps(slide.image, null, { width: 1920, height: 800 }, {
+          widths: [640, 960, 1280, 1600],
+          sizes: '100vw',
+        });
+        return (
+          <div
+            class:list={['hero-slide absolute inset-0', index === 0 && 'is-active']}
+            data-hero-slide
+            aria-hidden={index === 0 ? 'false' : 'true'}
+          >
+            <img
+              {...picture}
+              alt={slide.alt}
+              class="w-full h-full object-cover object-center pointer-events-none"
+              loading={index === 0 ? 'eager' : 'lazy'}
+              fetchpriority={index === 0 ? 'high' : 'low'}
+              decoding="async"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none"></div>
+            <div class="absolute bottom-6 sm:bottom-12 md:bottom-16 left-4 sm:left-10 md:left-16 max-w-xl z-20">
+              {slide.title && (
+                <h2 class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-white leading-tight mb-2 drop-shadow-md">
+                  {slide.title}
+                </h2>
+              )}
+              {slide.subtitle && (
+                <p class="text-xs sm:text-sm md:text-base text-slate-100 leading-relaxed mb-4 hidden sm:block max-w-lg drop-shadow">
+                  {slide.subtitle}
+                </p>
+              )}
+              {slide.ctaText && (
+                <a
+                  href={slide.ctaLink}
+                  class="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm text-white bg-orange-700 hover:bg-orange-800 shadow-md shadow-orange-700/30 transition-all transform hover:-translate-y-0.5 active:scale-95"
+                >
+                  <span>{slide.ctaText}</span>
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path d="m9 18 6-6-6-6"></path>
+                  </svg>
+                </a>
+              )}
+            </div>
+          </div>
+        );
+      })
+    }
+
+    {
+      slides.length > 1 && (
+        <>
+          <button
+            type="button"
+            data-hero-prev
+            class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-black/40 hover:bg-black/70 backdrop-blur-md border border-white/20 text-white flex items-center justify-center"
+            aria-label="สไลด์ก่อนหน้า"
+          >
+            <svg class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+          </button>
+          <button
+            type="button"
+            data-hero-next
+            class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-black/40 hover:bg-black/70 backdrop-blur-md border border-white/20 text-white flex items-center justify-center"
+            aria-label="สไลด์ถัดไป"
+          >
+            <svg class="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path d="m9 18 6-6-6-6"></path>
+            </svg>
+          </button>
+        </>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .hero-slide {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .hero-slide.is-active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 1;
+  }
+</style>
+
+<script>
+  function setupHeroCarousel() {
+    document.querySelectorAll<HTMLElement>('[data-hero-carousel]').forEach((root) => {
+      if (root.dataset.ready === '1') return;
+      root.dataset.ready = '1';
+
+      const slides = Array.from(root.querySelectorAll<HTMLElement>('[data-hero-slide]'));
+      if (slides.length < 2) return;
+
+      let index = Math.max(0, slides.findIndex((slide) => slide.classList.contains('is-active')));
+      let timer = 0;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const show = (next: number) => {
+        index = (next + slides.length) % slides.length;
+        slides.forEach((slide, slideIndex) => {
+          const active = slideIndex === index;
+          slide.classList.toggle('is-active', active);
+          slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+        });
+      };
+
+      const stop = () => window.clearInterval(timer);
+      const start = () => {
+        stop();
+        if (reduceMotion) return;
+        timer = window.setInterval(() => show(index + 1), 5000);
+      };
+
+      root.querySelector('[data-hero-prev]')?.addEventListener('click', () => {
+        show(index - 1);
+        start();
+      });
+      root.querySelector('[data-hero-next]')?.addEventListener('click', () => {
+        show(index + 1);
+        start();
+      });
+
+      let startX = 0;
+      root.addEventListener('touchstart', (event) => {
+        startX = event.touches[0]?.clientX ?? 0;
+        stop();
+      }, { passive: true });
+      root.addEventListener('touchend', (event) => {
+        const endX = event.changedTouches[0]?.clientX ?? startX;
+        const delta = endX - startX;
+        if (delta > 50) show(index - 1);
+        else if (delta < -50) show(index + 1);
+        start();
+      }, { passive: true });
+
+      root.addEventListener('mouseenter', stop);
+      root.addEventListener('mouseleave', start);
+      root.addEventListener('focusin', stop);
+      root.addEventListener('focusout', start);
+      start();
+    });
+  }
+
+  setupHeroCarousel();
+  document.addEventListener('astro:page-load', setupHeroCarousel);
+</script>
